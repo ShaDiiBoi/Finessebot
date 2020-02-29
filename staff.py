@@ -64,7 +64,9 @@ class staffcom(commands.Cog):
     async def trainee(self, ctx, member: discord.Member):
         guild = self.bot.get_guild(523042374209765377)
         trainee = ctx.guild.get_role(547792652029001737)
+        assistance_role = ctx.guild.get_role(683449205599371284)
         await member.add_roles(trainee)
+        await member.add_roles(assistance_role)
         invite = await guild.invites()
         inv = invite[0]
         print(inv.url)
