@@ -1,5 +1,7 @@
 import logging
 import datetime
+
+import mysql.connector
 import random
 import os
 import json
@@ -10,16 +12,43 @@ from discord.ext import commands
 import time
 import random
 from translate import Translator
-from database import insert, xcute, get_blacklist
+
+
+def pull(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse")
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    results = dbcursor.fetchall()
+    mydb.commit()
+    mydb.close()
+    return results
+
+def push(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse")
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    mydb.commit()
+    mydb.close()
+    return results
+
+
 class mod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.staff_ids = [547784768981434395,547780757251424258,534098929617207326,547792652029001737,534583040454688781,547784731157200927]
         self.staff_path = "/home/shadbot/punish_data/staff"
-        self.logchan = self.bot.get_channel(647215305885483019)
+        self.logchan = self.bot.get_channel(668163108090413088)
 
     @classmethod
-    def id_gen(self):
+    def id_gen(cls):
         
         unique = False
         while unique is False:
@@ -34,40 +63,23 @@ class mod(commands.Cog):
                 break
             
         return idx
-
+    @classmethod
+    def check_hierarchy(cls, punisher,punishee):
+        if punishee.top_role >= punisher.top_role:return True 
+        else: return False
 
     @commands.has_any_role(586494766359904257, 548846050056863756)
     @commands.command()
     async def translate(self, ctx, fromlang, tolang, *, sentence):
         translator = Translator(to_lang=f"{tolang}",from_lang=f"{fromlang}")
         process = translator.translate(f"{sentence}")
-        embed = discord.Embed(title="Angelica",description=f"{process}")
+        embed = discord.Embed(title="Finesse",description=f"{process}",color=discord.Color.teal())
         await ctx.send(embed=embed)
 
 
-    @commands.has_permissions(administrator=True)
-    @commands.command()
-    async def trainee(self, ctx, member: discord.Member):
-        guild = self.bot.get_guild(523042374209765377)
-        trainee = ctx.guild.get_role(547792652029001737)
-        await member.add_roles(trainee)
-        invite = await guild.invites()
-        inv = invite[0]
-        print(inv.url)
-        welcome_embed = discord.Embed(title="Finesse Promoter",description=f"Welcome To The Finesse Staff Team, Join The Server Below.",colour=discord.Colour.teal())
-        await member.send(content=inv.url,embed=welcome_embed)
-        print("embed sent")
-        def if_right_user(m): 
-            return m.guild.id == 523042374209765377 and m.id == member.id
-        altera_member = await self.bot.wait_for("member_join",check=if_right_user)
-        print("user joined")
-        fin_role = self.bot.get_guild(523042374209765377).get_role(523043000742313984)
-        trainee_altera_role = self.bot.get_guild(523042374209765377).get_role(553271228035497984)
-        await altera_member.add_roles(roles=[fin_role,trainee_altera_role])
-        print("roles used")
-        await self.bot.get_channel(567462624355155988).send(f"{member.mention} Promoted To Trainee,Check out <#663865191766949915>, <#663865191766949915> and <#663865191766949915>")
 
 
+        
 
     @commands.command()
     @commands.is_owner()
@@ -87,19 +99,37 @@ class mod(commands.Cog):
         if not member:
             await ctx.send("Please specify a member")
             return
+            print()
+        x = await pull("SELECT * FROM mutes WHERE uid = %s", (str(member.id),))
+        if len(x) == 0: 
+            await ctx.send("This User Is Not Muted")
+            return
+        print("index issue")
+        print(x)
+        rolelist = x[0][1].split(",")
+        print("index issue fixed")
+
+        print("role list comp worked")
+        print(rolelist)
         role = discord.utils.get(ctx.guild.roles, name="Muted")
+        print(role.name)
         await member.remove_roles(role)
-        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Been Unmuted!"))
+        finesse = self.bot.get_guild(534050853477285888)
+        for role in rolelist:
+            role = finesse.get_role(int(role))
+            await member.add_roles(role)
+        embed = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Unmuted!",color=discord.Color.teal())
         embed.set_author(name="Finesse")
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
+        embed = discord.Embed(title="Finesse Moderation System!", description=f"{member.mention} Has Been Unmuted By {ctx.author.mention}",color=discord.Color.teal())
         await self.logchan.send(embed=embed)
 
     @unmute.error
     async def unmute_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            embed = discord.Embed(title="Finesse", description="You Are Not Allowed To Do This....")
-                    discord.Embed(title="Finesse", description="You Are Not Allowed To Do This....")
+            embed = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at, description="You Do Not Have Permissions To Do That",color=discord.Color.teal())
+                    
             embed.set_author(name="Finesse")
             embed.set_footer(text="Made By ShaD")
             await ctx.send(embed=embed)
@@ -109,210 +139,217 @@ class mod(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.has_any_role(547780757251424258,547784731157200927,547784768981434395,534098929617207326,547792652029001737)
-    async def purge(self, ctx,user: discord.Member, amount: int):
-        def check(m):
+    async def purge(self,ctx,user: discord.Member,amount: int):
+        def check2(m):
             return m.author.id == user.id
-        await ctx.channel.purge(limit=amount,check=check)
-        embed = discord.Embed(title='ShaDBot', description=(f"{amount} messages have been Purged By {ctx.author}!"))
+        await ctx.channel.purge(limit=amount,check=check2)
+        embed = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at, description=f"{amount} messages have been Purged By {ctx.author}!",color=discord.Color.teal())
         await ctx.send(embed=embed)
         await self.logchan.send(embed=embed)
 
     @commands.command()
     @commands.has_any_role(547780757251424258,547784731157200927,547784768981434395,534098929617207326)
-    async def mute(self, ctx,member: discord.Member=None, reason: str):
+    async def mute(self, ctx,member: discord.Member, reason: str=f"No Reason"):
         
-        if not member:
-            plz = discord.Embed(title="Finesse", description="Please Specify A Member...")
-            plz.set_author(name="Finesse")
-            plz.set_footer(text="Made By ShaD")
-            await ctx.send(embed=plz)
-            return
         mute_role = discord.utils.get(ctx.guild.roles, name="Muted")
         
-        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Been Muted By {ctx.author}!"))
+        embed = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Muted By {ctx.author.mention}!",color=discord.Color.teal())
         embed.set_author(name="Finesse")
         embed.set_footer(text="Made By ShaD")
         role_list = []
+        if mod.check_hierarchy(ctx.author,member):
+            ret_embed = discord.Embed(timestamp=ctx.message.created_at,title="Finesse",description="You can not mute this member as they  are higher than you in hierarchy",color=discord.Color.teal())
+            await ctx.send(embed=ret_embed)
+            return
         for role in member.roles:
             try:
                 await member.remove_roles(role)
 
             except: continue
-            role_list.append(role)
+            role_list.append(role.id)
         
 
         listrole = ",".join(map(str, role_list)) 
         await member.add_roles(mute_role)
-        insert("mutes",(ctx.author.id,listrole,))
+        push("insert into mutes VALUES (%s, %s,%s)",(member.id,listrole,reason))
         await ctx.send(embed=embed)
-        await self.logchan.send(embed=embed)
+        embed2 = discord.Embed(title="Finesse", description=f"{member.mention} Has Been Muted By {ctx.author.mention} For {reason}",color=discord.Color.teal())
+        embed.set_author(name="Finesse")
+        embed.set_footer(text="Made By ShaD")
+        await self.logchan.send(embed=embed2)
 
     @mute.error
     async def mute_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            embed = discord.Embed(title="Finesse", description="You do not have permissions to do this.",color=discord.Color.teal())
+            embed.set_author(name="Finesse")
+            embed.set_footer(text="Made By ShaDii")
+            await ctx.send(embed=embed)
+        elif isinstance(error,commands.MissingRequiredArgument):
+            embed = discord.Embed(title="Finesse", description="Syntax Is `.mute <member_mention_or_id> <reason>`",color=discord.Color.teal())
+            embed.set_author(name="Finesse")
+            embed.set_footer(text="Made By ShaDii")
+            await ctx.send(embed=embed)
+    @commands.command()
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def kick(self, ctx, member: discord.Member, reason: str = None):
+        if reason is None: reason = f'Action done by {ctx.author.mention} (ID: {ctx.author.id})'
+        if reason is not None: reason = f"Action Done By {ctx.author.mention}(Reason: {reason})"
+        await member.kick(reason=reason)
+        logchan = self.bot.get_channel(668163108090413088)
+        kicked = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at,description=f"<@{member.id}> Has Been Kicked From {ctx.guild.name} by <@{ctx.author.id}>",color=discord.Color.teal())
+        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Been Kicked By {ctx.author}!"))
+        embed.set_author(name="Finesse")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+        await logchan.send(embed=kicked)
+
+    @kick.error
+    async def kick_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             embed = discord.Embed(title="Finesse", description="You Are Not Allowed To Do This....")
             embed.set_author(name="Finesse")
             embed.set_footer(text="Made By ShaD")
             await ctx.send(embed=embed)
-        else:
-            print(error)
-    # @commands.command()
-    # @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    # @commands.guild_only()
-    # @commands.has_permissions(administrator=True)
-    # async def kick(self, ctx, member: discord.Member, reason: str = None):
-    #     if reason is None:
-    #         reason = f'Action done by {ctx.author} (ID: {ctx.author.id}'
-    #         await member.kick(reason=reason)
-    #         embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Been Kicked By {ctx.author}!"))
-    #         embed.set_author(name="Finesse")
-    #         embed.set_footer(text="Made By ShaD")
-    #         await ctx.send(embed=embed)
-
-    # @kick.error
-    # async def kick_error(self, ctx, error):
-    #     if isinstance(error, commands.CheckFailure):
-    #         embed = discord.Embed(title="Finesse", description="You Are Not Allowed To Do This....")
-    #         embed.set_author(name="Finesse")
-    #         embed.set_footer(text="Made By ShaD")
-          #  await ctx.send(embed=embed)
 
 
     @commands.has_any_role(547784768981434395,547780757251424258,534098929617207326,547792652029001737,534583040454688781,547784731157200927)
     @commands.command()
-    async def pban(self, ctx, user_id: typing.Union[int, discord.Member], ban_reason=None):
+    async def ban(self, ctx, user_id: typing.Union[int, discord.Member], ban_reason="No Reason Given"):
         banr = f"{ban_reason} (Requested By {ctx.author.mention})"
+        ban_victim = None
         if isinstance(user_id, int):
+            print("its a int")
             user = False
             try:
-                ban_victim = ctx.guild.get_member(user_id)#trys to get user through id method
+                ban_victim = ctx.guild.get_member(user_id)#trys to get user through server method
+                in_guild = True
             except Exception as e:
                 print("NOT A MEMBER")   
-                user = True
-            try:
-                ban_victim = self.bot.get_user(user_id)
-            except Exception as e:
-                ban_victim = discord.Object(id=user_id)
+                in_guild = False
+            if in_guild:
+                if mod.check_hierarchy(ctx.author,ban_victim):
+                    ret_embed = discord.Embed(timestamp=ctx.message.created_at,title="Finesse",description="You can not ban this member as they are higher than you in hierarchy",color=discord.Color.teal())
+                    await ctx.send(embed=ret_embed)
+                    return
+                else: pass
+            if not in_guild:
+                ban_victim = discord.Object(id=int(user_id))
                 ban_victim.server = discord.Object(id=ctx.guild.id)
             punish_id,punished,punisher,timestamp = self.id_gen(),ban_victim.id,ctx.author.id,ctx.message.created_at
-            
+            try: 
+                await ban_victim.send(content="https://discord.gg/yR7QXCt",embed=discord.Embed(title="Finesse Moderation System",description="You have been banned from finesse, to appeal your ban , join the server link below"))
+            except Exception as e:
+                print(e)
+
             await ctx.guild.ban(user=ban_victim, reason=ban_reason) 
-
+            ban_push = await pull("INSERT INTO bans VALUES (%s,%s,%s,%s)",(punished,timestamp,ban_reason,punisher))
             
-            # if not os.path.isfile(f"/home/shadbot/punish_data/{ctx.author.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ctx.author.id}.json","w+") as f:
-            #         info = {}
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         json.dump(info, f)
-            # if os.path.isfile(f"/home/shadbot/punish_data/{ctx.author.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ctx.author.id}.json","r+") as f:
-            #         info = json.load(f)
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         f.seek(0)
-            #         json.dump(info, f)
-            #         f.truncate()
-            # if os.path.isfile(f"/home/shadbot/punish_data/{ban_victim.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ban_victim.id}.json","r+") as f:
-            #         info = json.load(f)
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         f.seek(0)
-            #         json.dump(info, f)
-            #         f.truncate()
-
-            # if not os.path.isfile(f"/home/shadbot/punish_data/{ban_victim.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ban_victim.id}.json","w+") as f:     
-            #         info = {}
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         json.dump(info, f)
-            logchan = self.bot.get_channel(647215305885483019)
-            banned = discord.Embed(timestamp=ctx.message.created_at,description=f"{ban_victim.mention} Has Been Banned From {ctx.guild.name} by {ctx.author.mention}") # embed for ban
+        
+            logchan = self.bot.get_channel(668163108090413088)
+            banned = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at,description=f"{ban_victim.mention} Has Been Banned From {ctx.guild.name} by {ctx.author.mention}") # embed for ban
             await logchan.send(embed=banned)
             await ctx.send(embed=banned)
+            return
             
         if isinstance(user_id, discord.Member):
-            
-            logchan = self.bot.get_channel(647215305885483019)
-            banned = discord.Embed(timestamp=ctx.message.created_at,description=f"{ban_victim.mention} Has Been Banned From {ctx.guild.name} by {ctx.author.mention}") # embed for ban
+            print("its a member")
+            if mod.check_hierarchy(ctx.author,user_id):
+                ret_embed = discord.Embed(timestamp=ctx.message.created_at,title="Finesse",description="You can not ban this member as they are higher than you in hierarchy",color=discord.Color.teal())
+                await ctx.send(embed=ret_embed)
+                return
+            else: pass
+            logchan = self.bot.get_channel(668163108090413088)
+            banned = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at,description=f"<@{user_id.id}> Has Been Banned From {ctx.guild.name} by <@{ctx.author.id}>",color=discord.Color.teal()) # embed for ban
             await logchan.send(embed=banned)
-            await ctx.send(embed=banned)
             ban_victim = user_id
             punish_id,punished,punisher,timestamp = self.id_gen(),ban_victim.id,ctx.author.id,ctx.message.created_at        
+            ban_push = await pull("INSERT INTO bans VALUES (%s,%s,%s,%s)",(punished,timestamp,ban_reason,punisher))
             await user_id.ban(reason=ban_reason)
-            # if not os.path.isfile(f"/home/shadbot/punish_data/{ctx.author.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ctx.author.id}.json","w+") as f:
-            #         info = {}
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         json.dump(info, f)
-            # if os.path.isfile(f"/home/shadbot/punish_data/{ctx.author.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ctx.author.id}.json","r+") as f:
-            #         info = json.load(f)
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         f.seek(0)
-            #         json.dump(info, f)
-            #         f.truncate()
-            # if os.path.isfile(f"/home/shadbot/punish_data/{ban_victim.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ban_victim.id}.json","r+") as f:
-            #         info = json.load(f)
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         f.seek(0)
-            #         json.dump(info, f)
-            #         f.truncate()
-
-            # if not os.path.isfile(f"/home/shadbot/punish_data/{ban_victim.id}.json"):
-            #     with open(f"/home/shadbot/punish_data/{ban_victim.id}.json","w+") as f:     
-            #         info = {}
-            #         info[f"{punish_id}"]["punish_id"] = str(punish_id)
-            #         info[f"{punish_id}"]["punished"] = str(punished)
-            #         info[f"{punish_id}"]["punisher"] = str(punisher)
-            #         info[f"{punish_id}"]["timestamp"] = str(timestamp)
-            #         info[f"{punish_id}"]["ban_reason"] = ban_reason 
-            #         json.dump(info, f)
-            
             await ctx.send(embed=banned)
+            return
+            
             
     @commands.has_any_role(547784768981434395,547780757251424258,534098929617207326,547792652029001737,534583040454688781,547784731157200927)
     @commands.command(description="Unbans A User From The Server Through Their ID")
-    async def unban(self, ctx, user_id: typing.Union[int, discord.Member]):
-        try:
-            bans = await ctx.guild.bans()
+    async def unban(self, ctx, user_id: typing.Union[int, discord.User]):
+        if isinstance(user_id,int):
+            try:
+                await ctx.guild.unban(user=discord.Object(id=int(user_id)),reason=f"Unbanned By {ctx.author.mention}")
+            except Exception as e:
+                embed = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at,description=F"Error Occured, Send This To Shad:{e}",color=discord.Color.teal())
+                await ctx.send(embed=embed)
+                return
+            uid = user_id
+        if isinstance(user_id,discord.User):
+            try:
+                await ctx.guild.unban(user=discord.Object(id=int(user_id.id)),reason=f"Unbanned By {ctx.author.mention}")
+            except Exception as e:
+                embed = discord.Embed(title="Finesse Moderation System!",timestamp=ctx.message.created_at,description=F"Error Occured, Send This To Shad:{e}",color=discord.Color.teal())
+                await ctx.send(embed=embed)
+                return
+            uid = user_id.id
+        finished_embed = discord.Embed(title="Finesse Moderation System!",description=f"<@{uid}> Was Unbanned By <@{ctx.author.id}>",timestamp=ctx.message.created_at,color=discord.Color.teal())
 
-            for banEntry in bans:
-                user = banEntry.user
-                if user.id == user_id:
-                   await ctx.guild.unban(user=user,reason=f"Unbanned By {ctx.author.mention}")
-        except Exception as e:
-            embed = discord.Embed(title="Error!",description=F"Error Occured, Send This To Shad:{e}")
-            await ctx.send(embed=embed)
+        await self.logchan.send(embed=finished_embed)
+        await ctx.send(embed=finished_embed)
+
+
+    
+    @commands.command()
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.has_any_role(547792652029001737,547780757251424258,547784731157200927,547784768981434395,534098929617207326,547780757251424258,547784731157200927)
+    async def warn(self, ctx, member: discord.Member,reason):
+        now = datetime.datetime.utcnow()
+        strtime = now.strftime(self.timeformat)
+        pull_one("INSERT INTO warns (uid,reason,author,date) VALUES (%s,%s,%s,%s)",(member.id,reason,ctx.author.id,strtime,))
+
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Warned!",color=discord.Color.teal())
+        embed.set_author(name="Finesse")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Warned By {ctx.author.mention}",color=discord.Color.teal())
+        await self.bot.get_channel(668163108090413088).send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.has_any_role(547792652029001737,547780757251424258,547784731157200927,547784768981434395,534098929617207326,547780757251424258,547784731157200927)
+    async def wc(self, ctx, member: discord.Member):
+        
+        insert_query = pull("SELECT * FROM warns WHERE uid = '%s' LIMIT 20",(member.id,)) # Grabs Warns
+        if insert_query is None or len(insert_query) == 0:
+            no_warns = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Not Been Warned Before",color=discord.Color.teal())
+            await ctx.send(embed=no_warns)
             return
+        author_list = [f"<@{x[4]}>" for x in insert_query]
+        author_string = f"<@{author_list[0]}> ,".join(author_list[1:])
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Warned By {author_string},Check Your Dms For More Information",color=discord.Color.teal())
+        embed.set_author(name="Finesse")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"Warn List",color=discord.Color.teal())
+        for data in insert_query:
+            embed.add_field(name=f"{data[0]}",value=f"**Reason:** {data[2]}. **Author:** <@{data[3]}>. **Date:** {data[4]}")
+        await ctx.author.send(embed=embed)
+    
+    @commands.command()
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.has_any_role(547792652029001737,547780757251424258,547784731157200927,547784768981434395,534098929617207326,547780757251424258,547784731157200927)
+    async def delwarn(self, ctx, member: discord.Member,reason):
 
+        insert_query = pull_one("SELECT * FROM warns WHERE num = %s LIMIT 1",(wid,)) # Grabs Warns
+        if insert_query is None or len(insert_query) == 0:# Checks if there are any rows with the conditions asked
+            no_warns = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"This Warn ID Is Invalid",color=discord.Color.teal())
+            await ctx.send(embed=no_warns)
+            return
+        pull_one("DELETE FROM warns WHERE num = %s",(wid))
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"This Warning Has Been Deleted",color=discord.Color.teal())
+        embed.set_author(name="Finesse")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+     
 
 
 

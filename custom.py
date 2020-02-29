@@ -49,9 +49,14 @@ class custom(commands.Cog):
     @commands.has_any_role(548846050056863756,586494766359904257)
     @commands.cooldown(1, 60.0, type=commands.BucketType.user)
     async def create(self, ctx, comm_name = None):
+        
         whitelist = [566474760444182533,566478029644234752,611379940084023296]
+        
         comms = self.bot.commands
         comm_name_base = []
+        rolelist = [role.id for role in ctx.author.roles]
+
+       
         for x in comms:
             comm_name_base.append(x.name)
         if comm_name in comm_name_base:
@@ -62,6 +67,11 @@ class custom(commands.Cog):
             return
         if not os.path.exists(f"/home/shadbot/command_data/{ctx.author.id}"):
             os.makedirs(f"/home/shadbot/command_data/{ctx.author.id}")
+        elif os.path.exists(f"/home/shadbot/command_data/{ctx.author.id}"):
+            amount = len([name for name in os.listdir(f"/home/shadbot/command_data/{ctx.author.id}")])
+        if amount > 10 and 548846050056863756 not in rolelist:
+            await ctx.send("You Cant Create More Than 10 Commands Unless You Donate.")
+            return
         if comm_name is None:
             await ctx.send("You Need To Use The Following Syntax: \n `.create <commandname>` where `<commandname>` is the command name")
             return
@@ -429,16 +439,15 @@ class custom(commands.Cog):
     async def on_command_error(self, ctx, error):
         print(error)
         path = None
-
-        if not isinstance(error, commands.errors.CommandNotFound):
-            
-            
-            return  # Test for CommandNotFound and not another error
-        
-        elif not ctx.guild:
-            print("Not a guild")
-            return
-        
+        if not isinstance(error, commands.errors.CommandNotFound): return # Test for CommandNotFound and not another error              
+        elif not ctx.guild: return    
+        rolelist = ctx.author.roles
+        finrole = ctx.guild.get_role(586494766359904257)
+        finrole2 = ctx.guild.get_role(548846050056863756)
+        print(finrole.name)
+        print(finrole2.name)
+        print("roles have been gotten bois")
+        if finrole not in rolelist and finrole2 not in rolelist: return
         elif not os.path.isfile(f"/home/shadbot/command_data/{ctx.author.id}/{ctx.invoked_with}.json"):
             
             filelist = []

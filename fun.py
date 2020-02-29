@@ -3,7 +3,7 @@ import datetime
 import random
 import os
 import re
-from database import xcute
+
 from imgurpython import ImgurClient
 import json
 import discord
@@ -13,7 +13,8 @@ import asyncio
 from urllib.parse import urlparse
 import praw
 from imgurpython import ImgurClient
-from database import get_blacklist
+import mysql.connector
+
 #LISTS OF IMGUR LINKS
 hugl = ["https://i.imgur.com/giviAg7.gif", "https://i.imgur.com/H1hlvmb.gif", "https://i.imgur.com/S1DU3yp.gif", "https://i.imgur.com/yZyAVaW.gif", "https://i.imgur.com/kDziQNd.gif"]
 glarel = ["https://i.imgur.com/2sACMZv.gif", "https://i.imgur.com/6YIeVUK.gif", "https://i.imgur.com/M3jCjto.gif", "https://i.imgur.com/ONnowrC.gif", "https://i.imgur.com/JHomlBX.gif"]
@@ -40,7 +41,18 @@ cmdlist = ["bite", "hug", "kiss", "slap", "blush", "cuddle", "lick", "squeeze", 
 
 
 
-
+def pull(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse")
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    results = dbcursor.fetchall()
+    mydb.commit()
+    mydb.close()
+    return results
 
 
 
@@ -407,10 +419,6 @@ class fun(commands.Cog):
     async def hug(self, ctx, user=None):
         with open("/home/shadbot/funurl.json","r+") as f:
             info = json.load(f)
-        emoji = []
-        for emojis in self.finesse.emojis:
-            if emojis.id == 614472024353669120:
-                emoji.append(emojis)
         if user is not discord.Member:
             embed = discord.Embed(title="Finesse", description=f"<:HugLeft:638367328773341185> {ctx.author.mention} has hugged {user}. I bet they liked it <:HugRight:638367329175994379>", color=0x8ffff8)
             picked = random.choice(info["hugl"])
@@ -626,30 +634,10 @@ class fun(commands.Cog):
                         f"Tea Fights {member.mention}"]
         picked = random.choice(responselist)
         await ctx.send(picked)
-    
-    @commands.command()
-    @commands.has_any_role(547780757251424258, 547784731157200927, 547784768981434395, 534098929617207326, 534583040454688781)
-    async def squadw(self, ctx):
-        emoji = []
-        for emojis in ctx.guild.emojis:
-            if emojis.id == 587799990475423744:
-                emoji.append(emojis)
-
-        embed = discord.Embed(title=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", description=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", color=0x8ffff8)
-        embed.add_field(name=f"Squadw", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}")
-        embed.add_field(name=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}")
-        embed.add_field(name=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}")
-        embed.add_field(name=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}")
-        embed.add_field(name=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", inline=True)
-        embed.add_field(name=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", inline=True)
-        embed.add_field(name=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", value=f"{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}{emoji[0]}", inline=True)
-        embed.set_footer(text=f"Kimo And Shad")
-        embed.set_image(url="https://cdn.discordapp.com/emojis/587799990475423744.png?v=1")
-        await ctx.send(embed=embed)
 
     def blacklisted():
         async def predicate(ctx):
-            x = get_blacklist()
+            x = pull("select * from blacklist")
             return ctx.author.id not in x
         return commands.check(predicate)
         
@@ -672,7 +660,7 @@ class fun(commands.Cog):
         x = [mes for mes in wordList if mes in self.banned_words]
         if len(x) > 0:
             await self.bot.get_channel(663143750046056507).send(f"<@{ctx.author.id}> Has Just Used A Banned Word In There Confession, The Word Was `{x[0]}`")
-            blacklisted = insert(blacklist,(str(ctx.author.id)))
+            blacklisted = pull("INSERT INTO blacklist VALUES (%s,%s)",(ctx.author.id,"Violated The Confession System Word Filter"))
             await ctx.author.send("You Have Been Blacklisted From The Confession System")
 
         

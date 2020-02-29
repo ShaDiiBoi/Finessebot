@@ -1,3 +1,6 @@
+#S
+
+
 import logging
 import datetime
 import json
@@ -8,17 +11,50 @@ from collections.abc import Sequence
 import mysql.connector
 import zipfile
 import asyncio
+import datetime
 import pinterest
 import re
-from database import insert, xcute
+import mysql.connector
 
 
 
+def pull(*args):
+    
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse",)
+
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    
+    results = dbcursor.fetchall()
+    mydb.commit()
+    dbcursor.close()
+    mydb.close()
+    return results
+def pull_one(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse",
+                    )
+    dbcursor = mydb.cursor(buffered=False)
+    dbcursor.execute(*args)
+    
+    results = dbcursor.fetchone()
+    mydb.commit()
+    dbcursor.close()
+    mydb.close()
+    return results
 
 
 class staffcom(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.timeformat = "%Y-%m-%d %H:%M:%S"
         self.error_channel = bot.get_channel(596509055376162831)
         self.whitelist = [342497540261806082,475304536920031232]
         self.num = 0
@@ -46,6 +82,14 @@ class staffcom(commands.Cog):
         await self.bot.get_channel(567462624355155988).send(f"{member.mention} Promoted To Trainee,Check out <#567466338617131010>, <#582968437018460165> and <#567466355629096980>")
 
 
+
+ # ? S T A F F  W A R N  S Y S T E M 
+
+
+
+
+
+# ? E N D  O F  S T A F F  W A R N  S Y S T E M 
 
     @commands.command()
     @commands.has_any_role(547784768981434395,547780757251424258,534098929617207326,534583040454688781)
@@ -172,7 +216,8 @@ class staffcom(commands.Cog):
                         "boyfriend","relationship","single","taken",
                         "not looking","gay","straight","lesbian",
                         "asexual","transgender","heterosexual",
-                        "bf","gf","homosexual","bisexual","dom","bdsm"]
+                        "bf","gf","homosexual","bisexual","dom","bdsm","dating"]
+                        
         if message.channel.id == 566474557834395659:
             vno = ["nigger", "nigga", "niggas", "niggers", "n!ggers"]
             mystr = message.content.lower()
@@ -218,17 +263,6 @@ class staffcom(commands.Cog):
         await vc.edit(colour=hexx)
         await ctx.send(f"{vc.name}'s Color  Changed To {str(hexx.value)}")
 
-    @commands.command()
-    @commands.cooldown(1, 30.0, type=commands.BucketType.default)
-    @commands.has_any_role(635162519748739074)
-    async def husky(self, ctx, user: discord.Member):
-        if ctx.author.id not in self.whitelist:
-            await ctx.send("You Are Not Whitelisted")
-            return 
-        role = ctx.guild.get_role(647192142380269607)
-        await user.add_roles(role)
-        embed = discord.Embed(title="Finesse Bot",description=f"{user.mention} Has Been Given {role.name}")
-        await ctx.send(embed=embed)
     @commands.command()
     @commands.is_owner()
     async def newElite(self, ctx, user: discord.Member=None):
@@ -284,19 +318,36 @@ class staffcom(commands.Cog):
         
 
 
+    
     @commands.guild_only()
-    @commands.has_role(605831555671261197)
+    @commands.has_role(637352105375694851)
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.command()
-    async def Carrot(self, ctx, member: discord.Member=None):
+    async def bank(self, ctx, member: discord.Member=None):
         if not member:
             plz = discord.Embed(title="Finesse", description="Please Specify A Member To Give This Role")
             plz.set_footer(text="Made By ShaD")
             await ctx.send(embed=plz)
             return
-        role = ctx.guild.get_role(602608999547928759)
+        role = ctx.guild.get_role(673609333677752392)
         await member.add_roles(role)
-        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Become Mila's Carrot. Given By {ctx.author.mention}"))
+        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Invested, Thank You."))
+        embed.set_footer(text="Finesse!")
+        await ctx.send(embed=embed)
+
+    @commands.guild_only()
+    @commands.has_role(637352105375694851)
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    async def rbank(self, ctx, member: discord.Member=None):
+        if not member:
+            plz = discord.Embed(title="Finesse", description="Please Specify A Member To Give This Role")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(673609333677752392)
+        await member.remove_roles(role)
+        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Stopped Payments. Given By {ctx.author.mention}"))
         embed.set_footer(text="Finesse!")
         await ctx.send(embed=embed)
 

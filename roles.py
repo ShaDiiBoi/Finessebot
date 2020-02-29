@@ -107,39 +107,88 @@ class roles(commands.Cog):
 #PRIVATE ROLES
 
 
+
+
+
+
+#Leo ------------------------------------------------------------
+
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.command()
     @commands.guild_only()
-    @commands.has_any_role(651150468604624898)
-    async def deleder(self, ctx, member: discord.Member = None):
+    @commands.has_permissions(administrator=True)
+    async def pure(self, ctx, member: discord.Member = None):
         if not member:
             plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
             plz.set_footer(text="Made By ShaD")
             await ctx.send(embed=plz)
             return
-        role = ctx.guild.get_role(651149653475328009)
+        role = ctx.guild.get_role(645347568879927317)
         await member.remove_roles(role)
-        embed = discord.Embed(title="Finesse Bot", description=f"eder Has Removed His Role From {member.mention}!")
+        embed = discord.Embed(title="Finesse Bot", description=(f"You are too pure join the others above instead , {member.mention}!"))
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
-
 
 
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.command()
     @commands.guild_only()
-    @commands.has_any_role(651150468604624898)
-    async def edernotoksik(self, ctx, member: discord.Member , reason: str=None):
+    @commands.has_permissions(administrator=True)
+    async def sinner(self, ctx, member: discord.Member):
         if not member:
             plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
             plz.set_footer(text="Made By ShaD")
             await ctx.send(embed=plz)
             return
-        role = ctx.guild.get_role(651149653475328009)
+        role = ctx.guild.get_role(645347568879927317)
         await member.add_roles(role)
-        embed = discord.Embed(title="Finesse Bot", description=(f"eder has given his role to {member.mention}!"))
+        
+        embed = discord.Embed(title="Finesse Bot", description=f"You have been granted access to hell welcome , {member.mention}!")
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
+
+
+
+#XENO ------------------------------------------------------------
+
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_any_role(630410578258558976)
+    async def releasekarma(self, ctx, member: discord.Member = None):
+        if not member:
+            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(681950415872589861)
+        await member.remove_roles(role)
+        embed = discord.Embed(title="Finesse Bot", description=(f"You have disappointed Karma, expect it to hit you soon, {member.mention}!"))
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+
+
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_any_role(630410578258558976)
+    async def protectkarma(self, ctx, member: discord.Member):
+        if not member:
+            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(681950415872589861)
+        await member.add_roles(role)
+        
+        embed = discord.Embed(title="Finesse Bot", description=f"You are now a guardian of Karma, don't disappoint her, {member.mention}!")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+
+
+
+
+
 
 
 #REILLY------------------------------------------------------------
@@ -214,38 +263,38 @@ class roles(commands.Cog):
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
 
-#ACES ROLES ----------------------------------------------------
-    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_any_role(645014560646103080)
-    async def takesoul(self, ctx, member: discord.Member , reason: str=None):
-        if not member:
-            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
-            plz.set_footer(text="Made By ShaD")
-            await ctx.send(embed=plz)
-            return
-        role = ctx.guild.get_role(657548942900330498)
-        await member.add_roles(role)
-        embed = discord.Embed(title="Finesse Bot", description=(f"Ace Has Taken Your Soul!  ♦️ ♠️ ♥️ ♣️ {member.mention}!"))
-        embed.set_footer(text="Made By ShaD")
-        await ctx.send(embed=embed)
+# ? ACES ROLES ----------------------------------------------------
+    # @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    # @commands.command()
+    # @commands.guild_only()
+    # @commands.has_any_role(645014560646103080)
+    # async def takesoul(self, ctx, member: discord.Member , reason: str=None):
+    #     if not member:
+    #         plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+    #         plz.set_footer(text="Made By ShaD")
+    #         await ctx.send(embed=plz)
+    #         return
+    #     role = ctx.guild.get_role(657548942900330498)
+    #     await member.add_roles(role)
+    #     embed = discord.Embed(title="Finesse Bot", description=(f"Ace Has Taken Your Soul!  ♦️ ♠️ ♥️ ♣️ {member.mention}!"))
+    #     embed.set_footer(text="Made By ShaD")
+    #     await ctx.send(embed=embed)
     
-    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_any_role(645014560646103080)
-    async def returnsoul(self, ctx, member: discord.Member = None):
-        if not member:
-            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
-            plz.set_footer(text="Made By ShaD")
-            await ctx.send(embed=plz)
-            return
-        role = ctx.guild.get_role(657548942900330498)
-        await member.remove_roles(role)
-        embed = discord.Embed(title="Finesse Bot", description=f"Ace Has Given You Your Soul Back! ♦️ ♠️ ♥️ ♣️. {member.mention}!")
-        embed.set_footer(text="Made By ShaD")
-        await ctx.send(embed=embed)
+    # @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    # @commands.command()
+    # @commands.guild_only()
+    # @commands.has_any_role(645014560646103080)
+    # async def returnsoul(self, ctx, member: discord.Member = None):
+    #     if not member:
+    #         plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+    #         plz.set_footer(text="Made By ShaD")
+    #         await ctx.send(embed=plz)
+    #         return
+    #     role = ctx.guild.get_role(657548942900330498)
+    #     await member.remove_roles(role)
+    #     embed = discord.Embed(title="Finesse Bot", description=f"Ace Has Given You Your Soul Back! ♦️ ♠️ ♥️ ♣️. {member.mention}!")
+    #     embed.set_footer(text="Made By ShaD")
+    #     await ctx.send(embed=embed)
 
     # @commands.command()
     # @commands.has_any_role(625750524263661578)

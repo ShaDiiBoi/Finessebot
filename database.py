@@ -22,16 +22,22 @@ mydb = mysql.connector.connect(
                     passwd="shadii",
                     database="finesse")
 dbcursor = mydb.cursor(buffered=True)
-def xcute(seq,values: tuple):
-    dbcursor.execute(seq,values)
+def xcute(seq,values: tuple=None):
+    if values is None:
+        dbcursor.execute(seq)
+        results = dbcursor.fetchall()
+        mydb.commit()
+        return results
+    if values is not None:
+        dbcursor.execute(seq,values)
+        results = dbcursor.fetchall()
+        mydb.commit()
+        return results
+
+def pull(*args):
+    dbcursor.execute(*args)
     results = dbcursor.fetchall()
-    mydb.commit()
     return results
-def insert(table, data: tuple):
-    seq = f"INSERT INTO {table} VALUES {data}"
-    dbcursor.execute(seq)
-    mydb.commit()
-    return 
     
 
 

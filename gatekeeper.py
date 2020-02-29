@@ -9,6 +9,7 @@ import os.path
 from discord.ext import commands
 from collections.abc import Sequence
 import asyncio
+from discord.ext.commands import BucketType
 class gatekeeper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -36,7 +37,7 @@ class gatekeeper(commands.Cog):
             await ctx.send("You Cant Type This Here, do it in <#594101487806971904>")
             return
         
-
+    @commands.cooldown(3,5,type=BucketType.channel)
     @commands.command()
     async def agree(self, ctx):
         if ctx.channel.id != 594101487806971904:
@@ -71,7 +72,11 @@ class gatekeeper(commands.Cog):
         except Exception as e:
             await ctx.send("Error occured, try again")
             return
-
+    @agree.error
+    async def agree_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"This Command Is On Cooldown, Please Wait {round(error.retry_after)}")
+        else: print(error)
             
 def setup(bot):
     print("gatekeeper system Loading")

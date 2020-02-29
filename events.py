@@ -12,15 +12,10 @@ import time
 import mysql.connector
 from discord.ext import tasks
 import praw
+import re
 
 
 
-mydb = mysql.connector.connect(
-                    host="localhost",
-                    user="shad",
-                    passwd="shadii",
-                    database="finesse")
-dbcursor = mydb.cursor()
 class events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -207,25 +202,41 @@ class events(commands.Cog):
 
 
     @commands.Cog.listener()
-    async def on_message_delete(self,message):
-        if message.channel.id == 653314553698058240:
-            p = "/home/shadbot/submissions.json" 
-            with open(p, "r+") as f:
-                data = json.load(f)
-                data["subsids"].pop(message.id)
-                f.seek(0)
-                json.dump(data,f)
-                f.truncate()
-            await message.author.send("Your submission has been Deleted!")
-    @commands.Cog.listener()
     async def on_message(self, message):
         blacklist = [181470050039889920, 277233016974213120, 403549673857744898]  # list of people the bot wont take messages from
         lovelist = [550398711042277386,203931003453046784, 276011140734255104]
-        stafflist = [109866305238085632, 277233016974213120, 427292582939197441, 568125533200711680, 550398711042277386, 293060596281245696, 303297817705971712, 208399322516160513]
+        stafflist = [547784731157200927,547784768981434395,615624883405324289,534098929617207326,534583040454688781,547792652029001737,547780757251424258]
+        banned_words = ["dating","d@ting","dayting","d8ing","d8ting"]
+                    
+        
+        mystr = message.content.lower()
+        wordList = re.sub("[^\w]", " ",  mystr).split()
+        for word in wordList:
+            if word in banned_words:
+                rolelist = [x.id for x in message.author.roles if x.id in stafflist]
+                if len(rolelist) == 0:
+                    await message.delete()
+                    embed = discord.Embed(title="Finesse Automod",description=f"You Cant Say `{word}` in finesse, sorry for the inconvenience and if you have a issue with this, DM the owner.",color=discord.Color.teal())
+                    await message.author.send(embed=embed)
+                else: pass
+                    
+
+            
         channel = message.channel
         msg = message.content
+        if channel.id == 566523629886504972:
+            if message.author.id == 599536624870752282:
+                embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no partner role from the** <#566514394612105216> **channel!**")
+                await message.channel.send(embed=embed)
         if channel.id == 566481803204886549:
             if "discord.gg/" in msg:
+                
+                mydb = mysql.connector.connect(
+                                    host="localhost",
+                                    user="shad",
+                                    passwd="shadii",
+                                    database="finesse")
+                dbcursor = mydb.cursor()
 
                 new_partner = False
                 check = "SELECT * FROM partner WHERE uid = %s" 
@@ -253,15 +264,6 @@ class events(commands.Cog):
                 embed = discord.Embed(title="Partner Log",description=f"{dbcursor.rowcount} rows have been updated")
                 embed.add_field(name=f"Partner Counter",value=f"<@{message.author.id}> Has Partnered,They Now Have {amount[0]} Partners")
                 await self.bot.get_channel(649366716836610059).send(embed=embed)
-        if channel.id == 653314553698058240:
-            p = "/home/shadbot/submissions.json"         
-            with open(p, "r+") as f:
-                data = json.load(f)
-                data["subsids"].append(message.id)
-                f.seek(0)
-                json.dump(data,f)
-                f.truncate()
-            await message.author.send("Your submission has been registered!")
 
         if channel.id == 566475605743501334:
             if message.attachments:
@@ -307,7 +309,7 @@ class events(commands.Cog):
     
 
 
-    @tasks.loop(hours=3,minutes=25)
+    @tasks.loop(hours=5,minutes=25)
     async def discord_me_bump(self):
         shad = self.bot.get_user(475304536920031232)
         await shad.send("Go Bump Finesse On Discord.me! \n https://discord.me/dashboard")
