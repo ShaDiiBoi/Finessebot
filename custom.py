@@ -2,6 +2,7 @@
 import random
 import os
 import json
+import shutil
 import discord
 from pathlib import Path
 import asyncio
@@ -22,6 +23,47 @@ class custom(commands.Cog):
         self.bot = bot
         self.error_channel = bot.get_channel(596509055376162831)
     
+
+    @commands.Cog.listener()
+    async def on_member_update(self,before,after):
+        boost = before.guild.get_role(586494766359904257)
+        if boost in before.roles and boost not in after.roles:
+                
+            folder = f'/home/shadbot/command_data/{after.id}'
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+                print("cleared %s's Commands!" % (after.name))
+
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def clearcomms(self,ctx,user):
+                     
+        folder = f'/home/shadbot/command_data/{user}'
+        rolelist = [x.id for x in user.roles]
+        if 586494766359904257 in rolelist or 548846050056863756 in rolelist:
+            return
+        else:
+
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+            await ctx.send(f"cleared <@{user}>'s Commands!")
+
+
     @commands.command()
     @commands.guild_only()
     @commands.has_any_role(548846050056863756,586494766359904257)
