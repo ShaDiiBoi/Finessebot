@@ -111,8 +111,8 @@ class custom(commands.Cog):
             os.makedirs(f"/home/shadbot/command_data/{ctx.author.id}")
         elif os.path.exists(f"/home/shadbot/command_data/{ctx.author.id}"):
             amount = len([name for name in os.listdir(f"/home/shadbot/command_data/{ctx.author.id}")])
-        if amount > 10 and 548846050056863756 not in rolelist:
-            await ctx.send("You Cant Create More Than 10 Commands Unless You Donate.")
+        if amount > 5 and 548846050056863756 not in rolelist:
+            await ctx.send("You Cant Create More Than 5 Commands Unless You Donate.")
             return
         if comm_name is None:
             await ctx.send("You Need To Use The Following Syntax: \n `.create <commandname>` where `<commandname>` is the command name")
@@ -257,7 +257,7 @@ class custom(commands.Cog):
         if os.path.exists(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json"):
                 
             def check(m):
-                    return isinstance(m.channel, discord.abc.PrivateChannel) and m.author.id == ctx.author.id
+                return m.author == ctx.message.author and m.channel.id == ctx.channel.id
             def make_sequence(seq):
                 if seq is None:
                     return ()
@@ -294,7 +294,7 @@ class custom(commands.Cog):
             charm.add_field(name="Embed Description", value=":two:")
             charm.add_field(name="Embed Color", value=":three:")
             charm.add_field(name="Embed Image", value=":four:")
-            editmsg = await user.send(embed=charm)
+            editmsg = await ctx.send(embed=charm)
             await editmsg.add_reaction(emoji="1\N{combining enclosing keycap}")
             await editmsg.add_reaction(emoji="2\N{combining enclosing keycap}")
             await editmsg.add_reaction(emoji="3\N{combining enclosing keycap}")
@@ -305,7 +305,7 @@ class custom(commands.Cog):
                 await user.send("You Ran Out Of Time")
             else: # NAME 
                 if str(reaction.emoji) == "1\N{combining enclosing keycap}":
-                    await user.send("What do you want your new Title to be?.")
+                    await ctx.send("What do you want your new Title to be?.")
                     titlechange = await self.bot.wait_for("message", check=check)
                     with open(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json", "r+") as f:
                         data = json.load(f)
@@ -318,7 +318,7 @@ class custom(commands.Cog):
 
                 #SEXUAL PREFERENCE
                 if str(reaction.emoji) == "2\N{combining enclosing keycap}":
-                    await user.send("What are you changing your embed body to?")
+                    await ctx.send("What are you changing your embed body to?")
                     sexchange = await self.bot.wait_for("message", check=check)
                     with open(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json", "r+") as dat:
                         data = json.load(dat)
@@ -327,15 +327,15 @@ class custom(commands.Cog):
                         json.dump(data, dat)
                         dat.truncate()
                     print("saved")
-                    await user.send("Data Sucessfully Saved!")
+                    await ctx.send("Data Sucessfully Saved!")
 
                     #BIOGRAPHY
                 if str(reaction.emoji) == "3\N{combining enclosing keycap}":
                     for x in range(4):
                         if x == 4:
-                            await ctx.author.send("You Are Struggling With This Too Much, DM <@475304536920031232> For Help")
+                            await ctx.send("You Are Struggling With This Too Much, DM <@475304536920031232> For Help")
                             return
-                        await ctx.author.send("Please Pick A Color By copying the hex and paste it here, eg `#74ff00` \nhttps://htmlcolorcodes.com/color-picker/")
+                        await ctx.send("Please Pick A Color By copying the hex and paste it here, eg `#74ff00` \nhttps://htmlcolorcodes.com/color-picker/")
                         colorcode = await self.bot.wait_for("message", check=check)
                         try:
                             fincolor = await commands.ColourConverter().convert(ctx, colorcode.content)
@@ -350,35 +350,37 @@ class custom(commands.Cog):
                         dat.seek(0)  
                         json.dump(data, dat)
                         dat.truncate()
-                    await user.send("Data Sucessfully Saved!")
+                    await ctx.send("Data Sucessfully Saved!")
                 if str(reaction.emoji) == "4\N{combining enclosing keycap}":
-                    await user.send("What are you changing your embed Image to?, URL's Only")
-                    sexchange = await self.bot.wait_for("message", check=check)
+                    
                     for x in range(4):
                         if x == 4:
                             await ctx.channel.send("It is clear this is not working. Try again later.")
                             return
                         await ctx.channel.send("OK, please send a link to the image. Image uploading is not supported")
                         try:
-                            url = await self.bot.wait_for('message', timeout=80,check=check)
+                            url = await self.bot.wait_for('message', timeout=120,check=check)
                         except asyncio.TimeoutError:
                             await ctx.channel.send("You took too long! Please try again later.")
                             return
-
+                        link = url.content
                         url = urlparse(url.content)
                         if url.scheme == "":
                             link = f"https://{link}"
                         if url.scheme == "" and url.netloc == "":
                             await ctx.send("That Isnt A Link!, try again")
                             continue  # Checks headers to see if it is an image.
+                        print("cleared!")
+                        
+                        break
 
                     with open(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json", "r+") as dat:
                         data = json.load(dat)
-                        data["url"] = f"{url.content}"
+                        data["url"] = f"{link}"
                         dat.seek(0)  
                         json.dump(data, dat)
                         dat.truncate()
-                    await user.send("Data Sucessfully Saved!")   
+                    await ctx.send("Data Sucessfully Saved!")   
 
 
 
