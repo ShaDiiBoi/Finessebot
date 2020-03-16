@@ -1,0 +1,13 @@
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| uid       | varchar(255) | NO   | PRI | NULL    |       |
+| name      | varchar(100) | YES  |     | NULL    |       |
+| gender    | varchar(100) | YES  |     | NULL    |       |
+| interests | json         | YES  |     | NULL    |       |
+| hobbies   | varchar(255) | YES  |     | NULL    |       |
+| bio       | varchar(255) | YES  |     | NULL    |       |
+| age       | varchar(20)  | YES  |     | NULL    |       |
+| location  | varchar(80)  | YES  |     | NULL    |       |
+| dm_status | varchar(100) | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+

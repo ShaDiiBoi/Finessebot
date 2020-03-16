@@ -7,6 +7,58 @@ from discord.ext import commands
 import re
 from collections.abc import Sequence
 import asyncio
+import mysql.connector
+
+
+
+def pull(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse",
+                    )
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    
+    results = dbcursor.fetchall()
+    mydb.commit()
+    return results
+
+def pull_one(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse")
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    
+    results = dbcursor.fetchone()
+    mydb.commit()
+    return results
+
+async def create_normal_embed(data,color):
+    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
+    uid,name,gender,interests,hobbies,bio,age,location,dm_status
+
+     
+
+
+async def create_charm_embed(data,color):
+    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
+    uid,name,gender,interests,hobbies,bio,age,location,dm_status
+    
+
+async def create_charmplus_embed(data,color):
+    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
+    uid,name,gender,interests,hobbies,bio,age,location,dm_status
+    
+
+async def create_charmplusplus_embed(data,color):
+    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
+    uid,name,gender,interests,hobbies,bio,age,location,dm_status
+    
 
 
 class profiles(commands.Cog):
@@ -17,7 +69,18 @@ class profiles(commands.Cog):
                         "boyfriend","relationship","single","taken",
                         "not looking","gay","straight","lesbian",
                         "asexual","transgender","heterosexual",
-                        "bf","gf","homosexual","bisexual","dom","bdsm"]
+                        "bf","gf","homosexual","bisexual","dom","bdsm"] 
+        self.colors = {
+            "red": 0xff656d,
+            "pink": 0xff656d,
+            "green": 0xff656d,
+            "red": 0xff656d,
+            "red": 0xff656d,
+            "red": 0xff656d,
+            "red": 0xff656d,
+            "red": 0xff656d,
+
+        }
         
 
 
@@ -52,14 +115,6 @@ class profiles(commands.Cog):
         channel = self.bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
 
-
-
-        #print
-    #Checks
-
-
-
-        
         def check(m):
                 return isinstance(m.channel, discord.abc.PrivateChannel) and m.author.id == user.id
         
