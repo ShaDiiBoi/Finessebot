@@ -37,12 +37,30 @@ def push(*args):
     dbcursor.execute(*args)
     mydb.commit()
     mydb.close()
+    return None
+
+def pull_one(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse",
+                    )
+    dbcursor = mydb.cursor(buffered=False)
+    dbcursor.execute(*args)
+    
+    results = dbcursor.fetchone()
+    mydb.commit()
+    dbcursor.close()
+    mydb.close()
     return results
+
 
 
 class mod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.timeformat = "%Y-%m-%d %H:%M:%S"
         self.staff_ids = [547784768981434395,547780757251424258,534098929617207326,547792652029001737,534583040454688781,547784731157200927]
         self.staff_path = "/home/shadbot/punish_data/staff"
         self.logchan = self.bot.get_channel(668163108090413088)
@@ -100,17 +118,13 @@ class mod(commands.Cog):
             await ctx.send("Please specify a member")
             return
             print()
-        x = await pull("SELECT * FROM mutes WHERE uid = %s", (str(member.id),))
+        x = pull("SELECT * FROM mutes WHERE uid = %s", (str(member.id),))
         if len(x) == 0: 
             await ctx.send("This User Is Not Muted")
             return
-        print("index issue")
-        print(x)
-        rolelist = x[0][1].split(",")
-        print("index issue fixed")
 
-        print("role list comp worked")
-        print(rolelist)
+        rolelist = x[0][1].split(",")
+     
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         print(role.name)
         await member.remove_roles(role)
@@ -245,7 +259,7 @@ class mod(commands.Cog):
                 print(e)
 
             await ctx.guild.ban(user=ban_victim, reason=ban_reason) 
-            ban_push = await pull("INSERT INTO bans VALUES (%s,%s,%s,%s)",(punished,timestamp,ban_reason,punisher))
+            ban_push = pull("INSERT INTO bans VALUES (%s,%s,%s,%s)",(punished,timestamp,ban_reason,punisher))
             
         
             logchan = self.bot.get_channel(668163108090413088)
@@ -266,7 +280,7 @@ class mod(commands.Cog):
             await logchan.send(embed=banned)
             ban_victim = user_id
             punish_id,punished,punisher,timestamp = self.id_gen(),ban_victim.id,ctx.author.id,ctx.message.created_at        
-            ban_push = await pull("INSERT INTO bans VALUES (%s,%s,%s,%s)",(punished,timestamp,ban_reason,punisher))
+            ban_push = pull("INSERT INTO bans VALUES (%s,%s,%s,%s)",(punished,timestamp,ban_reason,punisher))
             await user_id.ban(reason=ban_reason)
             await ctx.send(embed=banned)
             return

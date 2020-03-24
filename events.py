@@ -73,22 +73,7 @@ class events(commands.Cog):
         await memchan.edit(name=f"Users  》 {leng[0:2]},{leng[2:]}")
 
 
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def start_vote(self, ctx):
-        p = "/home/shadbot/submissions.json"         
-        with open(p, "r+") as f:
-            data = json.load(f)
-            idlist = list(data["subsids"])
-        for mid in idlist:
-            
-            
-            try:
-                message = await self.bot.get_channel(653314553698058240).fetch_message(int(mid))
-                await message.add_reaction("<:vote:661245128702165012>")
-            except Exception as e:
-                await ctx.send(f"could not find message {mid}")
-                continue
+
     @commands.command(hidden=True)
     @commands.is_owner()
     async def loops(self, ctx, loop_name,loop_condition):
@@ -220,7 +205,21 @@ class events(commands.Cog):
                     await message.author.send(embed=embed)
                 else: pass
                     
+        if channel.id == 566473203921321984:
+            mystr = message.content.lower()
+       
+            word_list = re.sub("[^\w]", " ",  mystr).split()
+            if "how" in word_list and "verify" in word_list:
+                    embed = discord.Embed(
+                                        title="Verification Info",
+                                        description="If you want to verify, check out the <#566523946934075393> For More Information"
+                                        )
+                    embed.set_footer(text="Finesse")
+                    await message.channel.send(embed=embed)
+            else: pass
 
+                
+            
             
         channel = message.channel
         msg = message.content
@@ -317,7 +316,7 @@ class events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await self.bot.change_presence(activity=discord.Game(name="This Bot Was Made By Shad", type=1))
+        await self.bot.change_presence(activity=discord.Game(name="DM Me Your Verification Photo!", type=1))
         print("ShaDBoT Has Been Activated")
 
 

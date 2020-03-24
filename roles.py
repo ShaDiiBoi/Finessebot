@@ -227,6 +227,40 @@ class roles(commands.Cog):
         await ctx.send(embed=embed)
 
 
+#STEAKS ROLES ----------------------------------------------------
+
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_any_role(688748538968145995)
+    async def steak(self, ctx, member: discord.Member = None):
+        if not member:
+            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(688830864171204621)
+        await member.remove_roles(role)
+        embed = discord.Embed(title="Finesse Bot", description=f"You're a lil shit now, {member.mention}!")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+
+
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_any_role(688748538968145995)
+    async def misteak(self, ctx, member: discord.Member , reason: str=None):
+        if not member:
+            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(688830864171204621)
+        await member.add_roles(role)
+        embed = discord.Embed(title="Finesse Bot", description=(f" You fucked up. {member.mention}!"))
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
 
 #CASSIES ROLES ----------------------------------------------------
 

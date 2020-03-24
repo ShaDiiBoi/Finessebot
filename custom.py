@@ -303,7 +303,7 @@ class custom(commands.Cog):
                 reaction, user = await self.bot.wait_for("reaction_add", check=reaction_check(message=editmsg, emoji=[f"{i}\N{combining enclosing keycap}" for i in range(1,6)], author=user), timeout=120.00)
             except asyncio.TimeoutError:
                 await user.send("You Ran Out Of Time")
-            else: # NAME 
+            else: # title  
                 if str(reaction.emoji) == "1\N{combining enclosing keycap}":
                     await ctx.send("What do you want your new Title to be?.")
                     titlechange = await self.bot.wait_for("message", check=check)
@@ -316,7 +316,7 @@ class custom(commands.Cog):
                     
 
 
-                #SEXUAL PREFERENCE
+                #  embed body
                 if str(reaction.emoji) == "2\N{combining enclosing keycap}":
                     await ctx.send("What are you changing your embed body to?")
                     sexchange = await self.bot.wait_for("message", check=check)
@@ -329,7 +329,7 @@ class custom(commands.Cog):
                     print("saved")
                     await ctx.send("Data Sucessfully Saved!")
 
-                    #BIOGRAPHY
+                    # COLOR
                 if str(reaction.emoji) == "3\N{combining enclosing keycap}":
                     for x in range(4):
                         if x == 4:
@@ -351,6 +351,7 @@ class custom(commands.Cog):
                         json.dump(data, dat)
                         dat.truncate()
                     await ctx.send("Data Sucessfully Saved!")
+                    # IMAGE LINK
                 if str(reaction.emoji) == "4\N{combining enclosing keycap}":
                     
                     for x in range(4):
@@ -439,7 +440,7 @@ class custom(commands.Cog):
             if not comm_data["unlocked"]:
                 comm_data["unlocked"] = True
             with open(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json","r+") as f:
-                f.seek(0)
+                f.seek(0) # finishes up the file and saves all the data
                 json.dump(comm_data, f)
                 f.truncate()
             await ctx.send("Command Has Been Unlocked!(This Means Anyone With Finesse Perks Can Use It Can Use It)")
@@ -488,9 +489,7 @@ class custom(commands.Cog):
         rolelist = ctx.author.roles
         finrole = ctx.guild.get_role(586494766359904257)
         finrole2 = ctx.guild.get_role(548846050056863756)
-        print(finrole.name)
-        print(finrole2.name)
-        print("roles have been gotten bois")
+
         if finrole not in rolelist and finrole2 not in rolelist: return
         elif not os.path.isfile(f"/home/shadbot/command_data/{ctx.author.id}/{ctx.invoked_with}.json"):
             
@@ -499,7 +498,7 @@ class custom(commands.Cog):
                 for file in files:
                     f = os.path.join(subdir, file)#gets all the files and makes a absolute path to them
                     filelist.append(f)
-            print("everything is appended to filelist")
+
             datalist = []
             accepted = False
             for x in filelist:
@@ -512,17 +511,17 @@ class custom(commands.Cog):
                     print(e)
                     print(f"The Following Data Was Corrupted For {x[:-5]}")
                     continue
-                if data["name"] == ctx.invoked_with and data["unlocked"]:
+                if data["name"] == ctx.invoked_with and data["unlocked"]: # checks if the author called the same command as the file has listed adn checks if its unlocked
                     accepted = True
                     path = x
                     break
         elif os.path.isfile(f"/home/shadbot/command_data/{ctx.author.id}/{ctx.invoked_with}.json"): path = f"/home/shadbot/command_data/{ctx.author.id}/{ctx.invoked_with}.json"
         
-        text = ctx.message.content.split(' ')
+        text = ctx.message.content.split(' ') # gets a list of words from the string
         text = text[len(text)-1]
         converter = commands.MemberConverter()
         try:
-            target = await converter.convert(ctx, text)
+            target = await converter.convert(ctx, text) # trys to convert the last word to a member
             print(f"convert failed FOR {ctx.author.name}")
         except commands.errors.BadArgument:
             target = None
@@ -563,13 +562,13 @@ class custom(commands.Cog):
                 return
             embed = discord.Embed(title=title, description=body,
                             colour=color2)
-        elif not checkKey(data, "color"):
+        elif not checkKey(data, "color"): # checks if there is a color code within the file
             
             embed = discord.Embed(title=title, description=body,
                                 colour=discord.Colour.red())
         if data['image']:  # Sets the image if one is specified.
         
-            embed.set_image(url=data['url'])
+            embed.set_image(url=data['url']) 
 
         await ctx.channel.send(embed=embed)  # Sends it. 
     
@@ -590,10 +589,10 @@ class custom(commands.Cog):
             return
         with open(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json","r+") as data:
             stuff = json.load(data)
-            if stuff["creator"] != ctx.author.id:
+            if stuff["creator"] != ctx.author.id: # checks if the command create is the command caller/author
                 await ctx.send("This command isn't yours")
                 return
-        os.remove(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json")
+        os.remove(f"/home/shadbot/command_data/{ctx.author.id}/{command}.json") # removes file
         await ctx.send("Command Removed")
     
     @commands.has_any_role(547784731157200927,547780757251424258,547784768981434395)
@@ -609,10 +608,10 @@ class custom(commands.Cog):
             await ctx.channel.send("Please specify a command")
             return
         
-        if not os.path.isfile(f"/home/shadbot/command_data/{member.id}/{command}.json"):
+        if not os.path.isfile(f"/home/shadbot/command_data/{member.id}/{command}.json"): # checks if they have a command fole
             await ctx.send("This Isnt A Command")
             return
-        os.remove(f"/home/shadbot/command_data/{member.id}/{command}.json")
+        os.remove(f"/home/shadbot/command_data/{member.id}/{command}.json") # removes the file from the VPS
         await ctx.send("Command Removed")
         logchan = self.bot.get_channel(649366716836610059)
 
@@ -621,12 +620,16 @@ class custom(commands.Cog):
     
         
 
+    # error handler for the create command
     @create.error
     async def start_error(self, ctx, error):
-        if isinstance(error, commands.errors.CommandOnCooldown):
-            await ctx.send("You Are On Cooldown,(The Cooldown Is 60 Seconds)")
+        if isinstance(error, commands.errors.CommandOnCooldown): # checks if the error is a cooldown error
+            await ctx.send("You Are On Cooldown,(The Cooldown Has {} seconds left)".format(error.retry_after))
     
 def setup(bot):
     print("Loading custom command System!")
     bot.add_cog(custom(bot))
     print("custom command sys loaded")
+
+
+
