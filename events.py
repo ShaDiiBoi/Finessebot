@@ -223,6 +223,9 @@ class events(commands.Cog):
             
         
         msg = message.content
+        if channel.id == 609427615450791937:
+            embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no event role from the** <#566514394612105216> **channel!**")
+            await message.channel.send(embed=embed)
         if channel.id == 566523629886504972:
             if message.author.id == 599536624870752282:
                 embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no partner role from the** <#566514394612105216> **channel!**")
