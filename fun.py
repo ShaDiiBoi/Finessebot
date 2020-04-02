@@ -66,7 +66,7 @@ class fun(commands.Cog):
         self.error_channel = bot.get_channel(596509055376162831)
         self.client_id = "0c30e0ce68c6213"
         self.secret = "e61ca8a36d88c6c9bbc6d47757bedcd7a5cffafca7de86699b36fe3bd06cbcf7"
-        self.banned_words = ["faggot","nigger","n1gger","niggers","n1ggers","fags","chinky","chinkys"]
+        self.banned_words = ["faggot","nigger","n1gger","niggers","n1ggers","fags","chinky","chinkys","horny","masturbate","cum"]
         
 
 
