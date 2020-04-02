@@ -38,27 +38,7 @@ def pull_one(*args):
     mydb.commit()
     return results
 
-async def create_normal_embed(data,color):
-    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
-    uid,name,gender,interests,hobbies,bio,age,location,dm_status
 
-     
-
-
-async def create_charm_embed(data,color):
-    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
-    uid,name,gender,interests,hobbies,bio,age,location,dm_status
-    
-
-async def create_charmplus_embed(data,color):
-    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
-    uid,name,gender,interests,hobbies,bio,age,location,dm_status
-    
-
-async def create_charmplusplus_embed(data,color):
-    data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8] = \  
-    uid,name,gender,interests,hobbies,bio,age,location,dm_status
-    
 
 
 class profiles(commands.Cog):
@@ -74,11 +54,11 @@ class profiles(commands.Cog):
             "red": 0xff656d,
             "pink": 0xff656d,
             "green": 0xff656d,
-            "red": 0xff656d,
-            "red": 0xff656d,
-            "red": 0xff656d,
-            "red": 0xff656d,
-            "red": 0xff656d,
+            "purple": 0xff656d,
+            "yellow": 0xff656d,
+            "blue": 0xff656d,
+            "gold": 0xff656d,
+            
 
         }
         
@@ -1096,7 +1076,7 @@ class profiles(commands.Cog):
     @commands.has_any_role("Europe", "United States", "Latin America", "Middle East", "Canada", "Asia","Africa","Oceania")
     @commands.has_any_role("Dm's ~ Open", "Dm's ~ Ask", "Dm's ~ Closed")
     async def start(self,ctx):
-
+        
         await ctx.message.delete()
         def check(m):
                 return isinstance(m.channel, discord.abc.PrivateChannel) and m.author.id == ctx.author.id
@@ -1108,40 +1088,43 @@ class profiles(commands.Cog):
         member = finesse.get_member(ctx.author.id)
         path2 = f"/home/shadbot/bump_check/{ctx.author.id}.json"
 
-        interest_roles = []
-        for role in finesse.roles:
-            if role.name.startswith("Likes"):
-                interest_roles.append(role)
-            else:
-                continue
-        user_interests = []
-        for role in interest_roles:
-            if role in member.roles:
-                user_interests.append(role)
-        
+  
+        user_interests = [role for role in finesse.roles if role.startswith("Likes") and role in member.roles]
         interests_names = [i.name[6:] for i in user_interests]
         interestString = " ,".join(interests_names)
 
 
         #ERROR HANDLER MINI
-        path = os.path.join("/home/shadbot/prof_data/", f"{ctx.author.id}.json")
-        if os.path.exists(path):
-            await user.send("You Already Made A Profile!")
+        profile_exist_check = pull_one(f"SELECT FROM profiles WHERE uid = '{str(member.id)}'")
+        if len(profile_exist_check) > 0:
+            error_embed = discord.embed(
+                title="Error!",
+                description="You have already made a profile. try bumping instead or ask a staff to remove your profile if you think this is a error.",
+                color=discord.Color.teal())
+            await member.send(embed=error_embed)
             return
+        
 
 
         #basic info
 
         
         full = f"{user.name}#{user.discriminator}, <@{user.id}>"
-        newchan = finesse.get_channel(566474557834395659)
+        intro_channel = finesse.get_channel(566474557834395659)
         
         
         #charm roles
         #C H A R M 
         finboost = finesse.get_role(585530183717748752)
         finesselite = finesse.get_role(515567432799092737)
-
+        roles = {
+            "female_verified": 593699295656542213,
+            "male_verified": 593699291722416129,
+            "other_verified": 593699293316120584,
+            "male": 547823326689493012,
+            "female": 547923211699093532,
+            "other": 547851482045874178,
+        }   
 
         #selfie verified roles
         fver = finesse.get_role(593699295656542213)
@@ -1156,10 +1139,8 @@ class profiles(commands.Cog):
 
 
         #dm status
-        open1 = finesse.get_role(583713696543408167)
-        closed = finesse.get_role(583714006938681405)
-        ask = finesse.get_role(583713937598709822)
-        print("command gets all roles")
+        dm_roles = ",".join((role.name) for role in finesse.roles if role.name.startswith("Dm's ~") and role in member.roles) # gets all dm status roles in members rolelist
+       
     # -----------------------------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------------------------
         if finboost in member.roles:

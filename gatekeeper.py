@@ -1,19 +1,21 @@
 import discord
 from pathlib import Path
 import time
-import sys, traceback
-import logging
-import datetime
-import json
+
+
+
+
+import asyncio
 import os.path
 from discord.ext import commands
-from collections.abc import Sequence
+
 import asyncio
 from discord.ext.commands import BucketType
 class gatekeeper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.finesse = self.bot.get_guild(534050853477285888)
+        time.sleep(2)
         self.agree_channel = self.bot.get_channel(594101487806971904)
         self.agree_role = self.finesse.get_role(593200687706275870)
         self.member_role = self.finesse.get_role(534052271265284096)
@@ -47,19 +49,28 @@ class gatekeeper(commands.Cog):
         member = guild.get_member(ctx.author.id)
         print(member.name)
         if self.agree_role not in member.roles and self.member_role in member.roles:
-            await ctx.author.send("You Already have access to finesse ,if you do not, then dm Shadii The Owner")
+            await ctx.author.send("You Already have access to finesse \
+                 ,if you do not, then dm Shadii  The Owner")
             return
         print(member.roles)
         if self.agree_role in member.roles and self.member_role not in member.roles:
             await member.remove_roles(self.agree_role)
             await member.add_roles(self.member_role)
             await ctx.message.delete()
-            await self.lobby.send(f"{member.mention} Just joined ** Finesse! ** ! <:sparkles_pink:548483031560880148> <:zzzfinesse:622064373741125673>")
+            await self.lobby.send(f"{member.mention} Just joined ** Finesse! ** ! \
+<:sparkles_pink:548483031560880148> <:zzzfinesse:622064373741125673>")
     @agree.error
     async def agree_error(self, ctx, error):
         print(error)
         if isinstance(error, commands.errors.MissingAnyRole):
-            await ctx.send(f"{ctx.author.mention} ⚠ **You will need to complete the following required** <#566514394612105216> **to enter Finesse**: Gender, Location, DM Status\n **Once you completed your roles confirm you’re 13 by typing: `.agree`**")
+            await ctx.send(f"{ctx.author.mention} ⚠ **You will need to complete the following required** \
+                <#566514394612105216> **to enter Finesse**: Gender, Location, DM Status\n \
+                **Once you completed your roles confirm you’re 13 by typing: `.agree`**")
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"This Command Is On Cooldown, Please Wait {round(error.retry_after)}")
+            warning_embed = discord.Embed(title="Possible Raid",description=f"<@{ctx.author.id}> Has triggered the\
+                cooldown,so people may be raiding finesse(small possibility), check <#566473203921321984> !")
+            await self.bot.get_channel(617164886144974848).send(embed=warning_embed)
         else:
             print(error)
             await ctx.send(f"Error Happened, Send This To The Owner ``` {error}```")
@@ -72,11 +83,8 @@ class gatekeeper(commands.Cog):
         except Exception as e:
             await ctx.send("Error occured, try again")
             return
-    @agree.error
-    async def agree_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"This Command Is On Cooldown, Please Wait {round(error.retry_after)}")
-        else: print(error)
+
+        
             
 def setup(bot):
     print("gatekeeper system Loading")

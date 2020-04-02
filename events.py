@@ -192,7 +192,7 @@ class events(commands.Cog):
         lovelist = [550398711042277386,203931003453046784, 276011140734255104]
         stafflist = [547784731157200927,547784768981434395,615624883405324289,534098929617207326,534583040454688781,547792652029001737,547780757251424258]
         banned_words = ["dating","d@ting","dayting","d8ing","d8ting"]
-                    
+        channel = message.channel
         
         mystr = message.content.lower()
         wordList = re.sub("[^\w]", " ",  mystr).split()
@@ -221,7 +221,7 @@ class events(commands.Cog):
                 
             
             
-        channel = message.channel
+        
         msg = message.content
         if channel.id == 566523629886504972:
             if message.author.id == 599536624870752282:

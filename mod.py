@@ -232,6 +232,7 @@ class mod(commands.Cog):
     @commands.has_any_role(547784768981434395,547780757251424258,534098929617207326,547792652029001737,534583040454688781,547784731157200927)
     @commands.command()
     async def ban(self, ctx, user_id: typing.Union[int, discord.Member], ban_reason="No Reason Given"):
+        
         banr = f"{ban_reason} (Requested By {ctx.author.mention})"
         ban_victim = None
         if isinstance(user_id, int):
