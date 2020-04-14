@@ -191,7 +191,7 @@ class events(commands.Cog):
         blacklist = [181470050039889920, 277233016974213120, 403549673857744898]  # list of people the bot wont take messages from
         lovelist = [550398711042277386,203931003453046784, 276011140734255104]
         stafflist = [547784731157200927,547784768981434395,615624883405324289,534098929617207326,534583040454688781,547792652029001737,547780757251424258]
-        banned_words = ["dating","d@ting","dayting","d8ing","d8ting"]
+        banned_words = ["dating","d@ting","dayting","d8ing","d8ting","nigger","nigga","niggas","niggers","n!ggers","n!ggas","dyke","faggot"]
         channel = message.channel
         
         mystr = message.content.lower()
@@ -223,7 +223,10 @@ class events(commands.Cog):
             
         
         msg = message.content
-        if channel.id == 609427615450791937:
+        if message.channel.id == 609427615450791937:
+            is_eventcord_or_staff = [role for role in message.author.roles if role.id in stafflist or role.id == 596776703939051530]
+            if len(is_eventcord_or_staff) == 0:
+                return
             embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no event role from the** <#566514394612105216> **channel!**")
             await message.channel.send(embed=embed)
         if channel.id == 566523629886504972:
