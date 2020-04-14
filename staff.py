@@ -58,7 +58,76 @@ class staffcom(commands.Cog):
         self.error_channel = bot.get_channel(596509055376162831)
         self.whitelist = [342497540261806082,475304536920031232]
         self.num = 0
-    
+        self.rules = {
+            "1.1": "1.1   Discrimination, hate speech, harassment, and insulting jokes targeting Disability, Gender Reassignment, Pregnancy and Maternity, Race, Religion or Belief, Sex and Sexual Orientation are strictly not allowed. We do not allow the use of the words 'ni^^er','ni^^a', 'ret^rd' and 'f^gg^t''(Obviously, replacing the ^.). Remain respectful to how a member may express themselves.",
+            "1.2": "If you have a personal grievance with a member, take it to direct messages. Do not create drama in lobby and/or get others involved.",
+            "1.3": " Do not blackmail, threaten, stalk, excessively disturb, DDoS, dox, raid, scam, bribe, plagiarise and/or impersonate any member.",
+            "1.4": "Heavily NSFW Content and behaviour is not allowed.",
+            "1.5": "Teasing and/or belittling staff in the server is not allowed. Targeting specific staff members is also prohibited.",
+            "1.6": "Do not speak any different language other than English in the server. Speaking another language is only allowed in direct messages.",
+            "1.7": "Stick and be respectful to the purpose of the server being for meeting new people, socialising and creativity. Trolling upon join by going against the server topic is not allowed.",
+            "2.1": "We cannot accept anyone under the age of 13.",
+            "3.1": "The following content is strictly not allowed: Child Porn, Prostitution, Underage Ageplay, Necrophilia/Snuff, Beastiality, Suicide, Gore, Vore, Scat.",
+            "3.2": "Content that contains discrimination targeting the following is not allowed: Disability, Gender Reassignment, Pregnancy and Maternity, Race, Religion or Belief, Sex and Sexual Orientation. Content that might appear disrespectful to how members express themselves is not allowed.",
+            "3.3": "Files and emojis containing nudity within Finesse are not allowed. It is not allowed to sell porn/nudity services within Finesse and to members in direct message.",
+            "3.4": "SFW nicknames/Usernames are not allowed within finesse and your nickname will be changed and you will possibly be kicked.",
+            "4.1": "If you are asked by a staff member to stop doing something then you are required to do so with no argument or talkback. If you believe this was unjustified contact a manager or above stating your argument.",
+            "4.2": "We reserve the right to decide when and how to consider something as offense and to punish for cases not listed in our rules. You can ask a staff member if you are in doubt.",
+            "4.3": "The Owners reserve the right to punish a member without warning nor eligible reason.",
+            "5.1": " Roles that do not correspond with an users identity is strictly not allowed. If you accidentally selected the wrong role you are required to make a role change request.",
+            "5.2": "It is strictly not allowed to photoshop your verification picture and/or use a verification picture that is not of your own.",
+            "5.3": "Having multiple roles that contradict each other is not allowed.",
+            "5.4": "Trolling your identity in the form of assigning roles, joking in chat upon join and joking in your profile is not allowed.",
+            "5.5": "Lying about age, gender or anything of the kind is not allowed.",
+            "6.1": "Do not direct message users that have the role ‘DM | Ask’ or ‘DM | Closed’. You must ask members with the role ‘DM | Ask’ in the #ask-to-dm channel and/or be given consent before sending a direct message.",
+            "7.1": "Do not attempt to Spam or Flood any channel or a member in direct messages. 5 messages within 3 seconds is considered Spam. 4-5+ lines or 10 of the same words within one message is considered Flood.",
+            "7.2": " Do not request or beg for paid content(nitro, gift cards, etc) or money.",
+            "7.3": "Multiple people saying the same message in near-succession is also considered spam.",
+            "7.4": "Use channels for their purpose and keep on topic. The purpose for each channel is its name.",
+            "7.5": "Making extremely loud noise, usage of voice modifiers and soundboards in Voice Chat are not allowed.",
+            "7.6": "NSFW streams in public Voice Chat is prohibited.",
+            "7.7": "Public Music Bots are allowed in Public Voice Chats and Karaoke Only.",
+            "7.8": "Having the same nickname as multiple other people is not allowed as it can be considered raiding/spamming.",
+            "7.9": "NSFW Or Earrape Music is not allowed in Public Or Private Voice Chats.",
+            "8.1": "You acknowledge that content available through Finesse Discord, including, without limitation, content in the form of text, graphics, software, music, sound, photographs, and videos (collectively, the “Intellectual Property”), is protected by copyright law, trademark law, patent law, and/or other proprietary rights and laws. All graphics displayed on Finesse Discord are the sole property of their respective owners and are not be re-used/uploaded without consent.",
+            "8.2": "If you are a copyright owner or an agent and believe that any content infringes upon your rights, send a direct message to Altera#6969.",
+            "9.1": "Advertising your website, discord server and/or other form of (nude) service within Finesse and/or direct message is not allowed. If you wish to partner contact a Partner Manager or Altera#6969.",
+            "9.2": "Self-Advertising a paid service within the server is occasionally not allowed. Contact a staff member to confirm if your service is allowed or not.",
+            "9.3": "Advertising anything in selfies is prohibited.",
+            "10.1": "By subscribing monthly to a purchasable role on the Service (Elite Subscription PayPal: paypal@nevermindmusic.nl or eneplayroom@gmail.com) you agree to not be eligible to issue a refund regardless of changes and circumstances involving the purchased goods.",
+            "10.2": " By purchasing to the Service you agree we reserve the right, without warning nor eligible reason, to withdraw your purchase.",
+
+
+
+
+        }
+
+    @commands.command()
+    @commands.cooldown(2,10,type=commands.BucketType.channel)
+    @commands.has_any_role(
+        547784731157200927,547784768981434395,615624883405324289,534098929617207326,534583040454688781,
+        547792652029001737,547780757251424258,548846050056863756,586494766359904257,642811907417309186,
+        642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045)
+    async def rule(self,ctx,*args):
+        if args[0] == "": # Checks if they inputted any arguments
+            embed=discord.Embed(title="Error!",description="The Syntax is `.rule <RuleNumber>`",color=discord.Color.red()) # constructs the embed  
+            await ctx.send(embed=embed)
+            return
+        try: float(args[0]) # checks if its a decimal as all rule numbers are decimals
+        except Exception: # error handler
+            embed=discord.Embed(title="Error!",description=f"{args[0]} is not a number!, Try again",color=discord.Color.red())
+            await ctx.send(embed=embed)
+            return
+        try: rule_string = self.rules[args[0]]
+        except Exception: # error handler
+            embed=discord.Embed(title="Error!",description=f"{args[0]} is not registered In The Dict/Is Not A Rule",color=discord.Color.red())
+            await ctx.send(embed=embed)
+            return
+        rule_embed = discord.Embed(title=f"Rule {args[0]}",description=F"{rule_string}",color=discord.Color.teal())
+        await ctx.send(embed=rule_embed)
+
+
+
     @commands.has_permissions(administrator=True)
     @commands.command()
     async def trainee(self, ctx, member: discord.Member):
@@ -106,8 +175,6 @@ class staffcom(commands.Cog):
                 user_ban = ban
                 found_name = ban.user.display_name + "#" + ban.user.discriminator
             else: continue
-
-            
         if found is False:
             embed = discord.Embed(title="Error!",description="Could Not Find This Ban, Retry Again",colour=discord.Colour.teal())
             await ctx.send(embed=embed)
