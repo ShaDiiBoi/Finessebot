@@ -325,8 +325,10 @@ class mod(commands.Cog):
         embed.set_author(name="Finesse")
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
-        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Warned By {ctx.author.mention}",color=discord.Color.teal())
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Warned By {ctx.author.mention} for {reason}",color=discord.Color.teal())
         await self.bot.get_channel(668163108090413088).send(embed=embed)
+        embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"You were warned in Finesse by a staff member for {reason}.If you have a problem with this punishment, DM Manager/HR+",color=discord.Color.teal())
+        await member.send(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
@@ -338,7 +340,7 @@ class mod(commands.Cog):
             no_warns = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Not Been Warned Before",color=discord.Color.teal())
             await ctx.send(embed=no_warns)
             return
-        author_list = [f"<@{x[4]}>" for x in insert_query]
+        author_list = [f"<@{x[3]}>" for x in insert_query]
         author_string = f"<@{author_list[0]}> ,".join(author_list[1:])
         embed = discord.Embed(title="Finesse Warn System!",timestamp=ctx.message.created_at, description=f"{member.mention} Has Been Warned By {author_string},Check Your Dms For More Information",color=discord.Color.teal())
         embed.set_author(name="Finesse")
