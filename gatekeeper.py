@@ -14,12 +14,16 @@ from discord.ext.commands import BucketType
 class gatekeeper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        
+    @commands.Cog.listener()
+    async def on_ready(self):
         self.finesse = self.bot.get_guild(534050853477285888)
-        time.sleep(2)
+
         self.agree_channel = self.bot.get_channel(594101487806971904)
         self.agree_role = self.finesse.get_role(593200687706275870)
         self.member_role = self.finesse.get_role(534052271265284096)
         self.lobby = self.bot.get_channel(566473203921321984)
+
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
