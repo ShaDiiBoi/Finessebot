@@ -37,8 +37,7 @@ class elite(commands.Cog):
         if len(rolename) > 30: 
             await ctx.send("Your Role Name Is Too Long")
             return
-        with open("/home/shadbot/custom_roles.json","r+") as f:
-            data = json.load(f)
+        
         await ctx.send("Check Your Dms!")
         if ctx.author.id in data.keys():
             await ctx.author.send("you have already created a role!, try again")
