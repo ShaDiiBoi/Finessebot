@@ -88,7 +88,7 @@ class roles(commands.Cog):
             plz.set_footer(text="Made By ShaD")
             await ctx.send(embed=plz)
             return
-        role = discord.utils.get(ctx.guild.roles, id=547858928239902726)
+        role = ctx.guild.get_role(547858928239902726)
         await member.add_roles(role)
 
     
@@ -144,6 +144,19 @@ class roles(commands.Cog):
         await member.add_roles(role)
         
         embed = discord.Embed(title="Finesse Bot", description=f"You have been granted access to hell welcome , {member.mention}!")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def thepurge(self, ctx,):
+    
+        role = ctx.guild.get_role(645347568879927317)
+        for member in role.members:
+            await member.remove_roles(role)
+        
+        embed = discord.Embed(title="Finesse Bot", description=f"Everyone has been purged from your role, {ctx.author.mention}!")
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
 
@@ -229,11 +242,13 @@ class roles(commands.Cog):
 
 #STEAKS ROLES ----------------------------------------------------
 
+
+
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.command()
     @commands.guild_only()
     @commands.has_any_role(688748538968145995)
-    async def steak(self, ctx, member: discord.Member = None):
+    async def misteak(self, ctx, member: discord.Member = None):
         if not member:
             plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
             plz.set_footer(text="Made By ShaD")
@@ -250,7 +265,7 @@ class roles(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.has_any_role(688748538968145995)
-    async def misteak(self, ctx, member: discord.Member , reason: str=None):
+    async def steak(self, ctx, member: discord.Member , reason: str=None):
         if not member:
             plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
             plz.set_footer(text="Made By ShaD")
@@ -296,67 +311,43 @@ class roles(commands.Cog):
         embed = discord.Embed(title="Finesse Bot", description=(f" cassrole has been given. {member.mention}!"))
         embed.set_footer(text="Made By ShaD")
         await ctx.send(embed=embed)
+#Christyns ROLES ----------------------------------------------------
 
-# ? ACES ROLES ----------------------------------------------------
-    # @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    # @commands.command()
-    # @commands.guild_only()
-    # @commands.has_any_role(645014560646103080)
-    # async def takesoul(self, ctx, member: discord.Member , reason: str=None):
-    #     if not member:
-    #         plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
-    #         plz.set_footer(text="Made By ShaD")
-    #         await ctx.send(embed=plz)
-    #         return
-    #     role = ctx.guild.get_role(657548942900330498)
-    #     await member.add_roles(role)
-    #     embed = discord.Embed(title="Finesse Bot", description=(f"Ace Has Taken Your Soul!  ♦️ ♠️ ♥️ ♣️ {member.mention}!"))
-    #     embed.set_footer(text="Made By ShaD")
-    #     await ctx.send(embed=embed)
-    
-    # @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    # @commands.command()
-    # @commands.guild_only()
-    # @commands.has_any_role(645014560646103080)
-    # async def returnsoul(self, ctx, member: discord.Member = None):
-    #     if not member:
-    #         plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
-    #         plz.set_footer(text="Made By ShaD")
-    #         await ctx.send(embed=plz)
-    #         return
-    #     role = ctx.guild.get_role(657548942900330498)
-    #     await member.remove_roles(role)
-    #     embed = discord.Embed(title="Finesse Bot", description=f"Ace Has Given You Your Soul Back! ♦️ ♠️ ♥️ ♣️. {member.mention}!")
-    #     embed.set_footer(text="Made By ShaD")
-    #     await ctx.send(embed=embed)
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_any_role(692214904354242560)
+    async def winner(self, ctx, member: discord.Member = None):
+        if not member:
+            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(696763875923853324)
+        await member.remove_roles(role)
+        embed = discord.Embed(title="Finesse Bot", description=f" {member.mention} has cheated to win against {ctx.author.mention}!")
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
 
-    # @commands.command()
-    # @commands.has_any_role(625750524263661578)
-    # async def sky(self, ctx, user: Union[int, discord.Member]):
-    #     chan = ctx.guild.get_channel(625751324776202268)
-    #     if isinstance(user, int):
-    #         try:
-    #             user = ctx.guild.get_member(user)
-    #         except Exception as e:
-    #             print(e)
-    #             await ctx.send("ERROR HAPPENED, SEND TO SHADII << ```{} ```".format(e))
-    #     await chan.set_permissions(user, connect=True)
-    #     await ctx.send(f"{user.mention} Has Gained  Access To Skylars VC!, Requested by {ctx.author.mention}!")
-    #     return
-    
-    # @commands.command()
-    # @commands.has_any_role(625750524263661578)
-    # async def skyrem(self, ctx, user: Union[int, discord.Member]):
-    #     chan = ctx.guild.get_channel(625751324776202268)
-    #     if isinstance(user, int):
-    #         try:
-    #             user = ctx.guild.get_member(user)
-    #         except Exception as e:
-    #             print(e)
-    #             await ctx.send("ERROR HAPPENED, SEND TO SHADII << ```{} ```".format(e))
-    #     await chan.set_permissions(user, connect=False)
-    #     await ctx.send(f"{user.mention} Has Lost Access To Skylars VC!, Requested by {ctx.author.mention}!")
-    #     return
+
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_any_role(692214904354242560)
+    async def loser(self, ctx, member: discord.Member , reason: str=None):
+        if not member:
+            plz = discord.Embed(title="Finesse Bot", description="Please Specify A Member...")
+            plz.set_footer(text="Made By ShaD")
+            await ctx.send(embed=plz)
+            return
+        role = ctx.guild.get_role(696763875923853324)
+        await member.add_roles(role)
+        embed = discord.Embed(title="Finesse Bot", description=(f"{member.mention} lost against {ctx.author.mention}!"))
+        embed.set_footer(text="Made By ShaD")
+        await ctx.send(embed=embed)
+
+
+
 
 def setup(bot):
     print("Role Commands Loading")
