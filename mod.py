@@ -315,7 +315,7 @@ class mod(commands.Cog):
     
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    @commands.has_any_role(547792652029001737,547780757251424258,547784731157200927,547784768981434395,534098929617207326,547780757251424258,547784731157200927)
+    @commands.has_any_role(547792652029001737,547780757251424258,547784731157200927,547784768981434395,534098929617207326,547780757251424258,547784731157200927,378667625036644353)
     async def warn(self, ctx, member: discord.Member,reason):
         now = datetime.datetime.utcnow()
         strtime = now.strftime(self.timeformat)

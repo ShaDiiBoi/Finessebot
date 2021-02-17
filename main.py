@@ -11,8 +11,11 @@ from discord.ext import commands
 from collections.abc import Sequence
 import asyncio
 
-bot = commands.Bot(command_prefix=".", owner_id=475304536920031232, case_insensitive=True)
+intents = discord.Intents.default()
+intents.members = True  # Subscribe to the privileged members intent.
 
+
+bot = commands.Bot(command_prefix=".", owner_id=475304536920031232,intents=intents)
 
 
 

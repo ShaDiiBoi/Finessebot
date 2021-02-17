@@ -21,8 +21,8 @@ class events(commands.Cog):
         self.bot = bot
         self.error_channel = bot.get_channel(596509055376162831)
         self.used = []
-        self.discord_me_bump.start()
-
+        #self.discord_me_bump.start()
+        self.mem_check.start()
         
     
 
@@ -62,7 +62,7 @@ class events(commands.Cog):
 
   
 
-    @tasks.loop(seconds=20)
+    @tasks.loop(seconds=60)
     async def mem_check(self):
         print("Task Works")
         fn = self.bot.get_guild(534050853477285888)
@@ -74,26 +74,20 @@ class events(commands.Cog):
 
 
 
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def loops(self, ctx, loop_name,loop_condition):
-        if loop_name == "memes" and loop_condition == "start":
-            self.memes.start()
-            await ctx.send(f"`{loop_name} has changed its condition to {loop_condition}`")
-        elif loop_name == "memes" and loop_condition == "stop":
-            self.memes.stop()
-            await ctx.send(f"`{loop_name} has changed its condition to {loop_condition}`")
-        if loop_name == "membercount" and loop_condition == "start":
-            self.mem_check.start()
-            await ctx.send(f"`{loop_name} has changed its condition to {loop_condition}`")
-        elif loop_name == "membercount" and loop_condition == "stop":
-            self.mem_check.stop()
-            await ctx.send(f"`{loop_name} has changed its condition to {loop_condition}`")
-        
-
 
     @commands.Cog.listener()
     async def on_member_update(self,before,after):
+        
+        if before.bot:
+            
+            affliation_server = self.bot.get_guild(523042374209765377)
+
+            if before.id in [member.id for member in affliation_server.members]:
+                print(before.status)
+                if (str(before.status) == 'online') and (str(after.status) == 'offline'):
+                    shad = self.bot.get_user(475304536920031232)
+                    embed = discord.Embed(title="Bot Down Detector",description=F"<@{after.id}> Has Gone Offline, Turn It Back On Soon.",color=discord.Color.red())
+                    await shad.send(embed=embed)
         finesse = self.bot.get_guild(534050853477285888)
         fin_boost = finesse.get_role(586494766359904257)
         fin_elite = finesse.get_role(548846050056863756)
@@ -121,7 +115,9 @@ class events(commands.Cog):
     async def on_reaction_add(self, reaction, user):
         #called when a reaction is used
         if reaction.message.guild.id != 534050853477285888: return
+        
         shadrole = reaction.message.guild.get_role(574397747319406592)
+       
         if reaction.emoji.id == 593389757778624523:
             if shadrole in user.roles:
 
@@ -133,14 +129,14 @@ class events(commands.Cog):
                     urlmes = reaction.message.attachments[0]
                     embed = discord.Embed(title=f"{reaction.message.channel}", description=f"{reaction.message.content}", color=0x9dfff3)
                     embed.set_author(name=f"{reaction.message.author.display_name}")
-                    embed.set_footer(text="ShadBotto")
+                    embed.set_footer(text="Finesse")
                     embed.set_image(url=urlmes.url)
                     await channel.send(embed=embed)
                     await chan.send("Starred!")
                     return
                 embed = discord.Embed(title=f"{reaction.message.channel}", description=f"{reaction.message.content}", color=0x9dfff3)
                 embed.set_author(name=f"{reaction.message.author.display_name}")
-                embed.set_footer(text="Property Of Shad")
+                embed.set_footer(text=f"{user.id}")
                 await channel.send(embed=embed)
                 await chan.send("Starred!")
 #--------------------------------------------------------------------------------------------------==--------------------------------#########################################
@@ -157,7 +153,7 @@ class events(commands.Cog):
                     urlmes = reaction.message.attachments[0]
                     embed = discord.Embed(title=f"{reaction.message.channel}", description=f"{reaction.message.content}", color=0x9dfff3)
                     embed.set_author(name=f"{reaction.message.author.display_name}")
-                    embed.set_footer(text="ShadBotto")
+                    embed.set_footer(text=f"{user.id}")
                     embed.set_image(url=urlmes.url)
                     await channel.send(embed=embed)
                     await chan.send("Starred!")
@@ -165,12 +161,27 @@ class events(commands.Cog):
 
                 embed = discord.Embed(title=f"{reaction.message.channel}", description=f"{reaction.message.content}", color=0x9dfff3)
                 embed.set_author(name=f"{reaction.message.author.display_name}")
-                embed.set_footer(text="Property Of Shad")
+                embed.set_footer(text=f"{user.id}")
                 await channel.send(embed=embed)
                 await chan.send("Starred!")
             if reaction.count > 3:
                 print("no")
                 return
+        channel = self.bot.get_channel(596509055376162831)
+        desc = f"""
+        Reaction Author: <@{user.id}>({user.name})\n
+            Reaction: {str(reaction.emoji)} \n 
+            Message Author: <@{reaction.message.author.id}> \n
+            Channel: <#{reaction.message.channel.id}> \n,
+            Message Link: https://discordapp.com/channels/{reaction.message.guild.id}/{reaction.message.channel.id}/{reaction.message.id}"""
+        log_embed = discord.Embed(title="Reaction Log",
+                            description=desc,
+                            color=discord.Color.teal(),
+                            timestamp=reaction.message.created_at
+                                )   
+        await asyncio.sleep(2)
+        await channel.send(embed=log_embed)
+        
                 
 
 
@@ -189,7 +200,7 @@ class events(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         blacklist = [181470050039889920, 277233016974213120, 403549673857744898]  # list of people the bot wont take messages from
-        lovelist = [550398711042277386,203931003453046784, 276011140734255104]
+        lovelist = [549545986943483904,330488802038513678,480903585140441088,550398711042277386,203931003453046784, 276011140734255104,484506274482880522,333257302507388938,619569134845296650]
         stafflist = [547784731157200927,547784768981434395,615624883405324289,534098929617207326,534583040454688781,547792652029001737,547780757251424258]
         banned_words = ["dating","d@ting","dayting","d8ing","d8ting","nigger","nigga","niggas","niggers","n!ggers","n!ggas","dyke","faggot"]
         channel = message.channel
@@ -212,26 +223,21 @@ class events(commands.Cog):
             if "how" in word_list and "verify" in word_list:
                     embed = discord.Embed(
                                         title="Verification Info",
-                                        description="If you want to verify, check out the <#566523946934075393> For More Information"
+                                        description="If you want to verify, check out the <#715637241158041771> For More Information"
                                         )
                     embed.set_footer(text="Finesse")
                     await message.channel.send(embed=embed)
             else: pass
-
-                
-            
-            
-        
         msg = message.content
         if message.channel.id == 609427615450791937:
             is_eventcord_or_staff = [role for role in message.author.roles if role.id in stafflist or role.id == 596776703939051530]
             if len(is_eventcord_or_staff) == 0:
                 return
-            embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no event role from the** <#566514394612105216> **channel!**")
+            embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no event role from the** <#715615805571858493> **channel!**")
             await message.channel.send(embed=embed)
         if channel.id == 566523629886504972:
             if message.author.id == 599536624870752282:
-                embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no partner role from the** <#566514394612105216> **channel!**")
+                embed = discord.Embed(title="How to stop these pings!",description="**To stop getting these pings, grab the no partner role from the** <#715615805571858493> **channel!**")
                 await message.channel.send(embed=embed)
         if channel.id == 566481803204886549:
             if "discord.gg/" in msg:
@@ -270,15 +276,10 @@ class events(commands.Cog):
                 embed.add_field(name=f"Partner Counter",value=f"<@{message.author.id}> Has Partnered,They Now Have {amount[0]} Partners")
                 await self.bot.get_channel(649366716836610059).send(embed=embed)
 
-        if channel.id == 566475605743501334:
-            if message.attachments:
-                await message.add_reaction(emoji="✅")
         if "shad" in msg.lower():
             if message.author.id == 530945830006292480: # if the message sent is from the bo
                 return
 
-            if message.author.id in blacklist:
-                return
             if message.author.id in lovelist:
                 await channel.send(f"love u {message.author.name} - Shad")
                 return
@@ -287,6 +288,12 @@ class events(commands.Cog):
             plz.set_footer(text="Made By ShaD")
             await user.send(embed=plz)
             print("Test Complete")
+        if "im sad" in msg.lower():
+            resp_embed = discord.Embed(title="Finesse Bot", description=f"Don't Be Sad Because Sad Backwards Is Das And Das Is Not Good")
+            resp_embed.set_footer(text="Made By Shadii")
+            await channel.send(embed=resp_embed)
+            return
+
         # if isinstance(channel, discord.abc.PrivateChannel):
         #     if msg.startswith("!confess"):
                 
@@ -314,10 +321,20 @@ class events(commands.Cog):
     
 
 
-    @tasks.loop(hours=5,minutes=25)
-    async def discord_me_bump(self):
-        shad = self.bot.get_user(475304536920031232)
-        await shad.send("Go Bump Finesse On Discord.me! \n https://discord.me/dashboard")
+    @commands.Cog.listener()
+    async def on_member_update(self,before,after):
+        finesse_boost = before.guild.get_role(586494766359904257)
+        if finesse_boost in before.roles and finesse_boost not in after.roles:
+            role_list_comp = [await after.removeroles(x) for x in after.roles if x.startswith("✦")]
+            resp_embed = discord.Embed(
+                    title="Event Logger!",
+                    description=f"{after.mention}({after.id}) has had their color roles stripped due to them losing their Finesse Boost rank.",
+                    color=discord.Color.teal(),
+                    timestamp=datetime.datetime.today()
+            )
+            await self.bot.get_channel(668163108090413088).send(embed=resp_embed)
+            
+
 
 
     @commands.Cog.listener()

@@ -49,6 +49,21 @@ def pull_one(*args):
     dbcursor.close()
     mydb.close()
     return results
+def push(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse",
+                    )
+    dbcursor = mydb.cursor(buffered=False)
+    dbcursor.execute(*args)
+    
+    
+    mydb.commit()
+    dbcursor.close()
+    mydb.close()
+    return None
 
 
 class staffcom(commands.Cog):
@@ -101,6 +116,28 @@ class staffcom(commands.Cog):
 
 
         }
+    async def ask_a_question(self,ctx,question: str):
+        """
+        This function is used to ask a question, return input and stop multiple instances of the same code.
+        Channel is a discord.Channel object to which the question is sent
+        Question is a str argument that is sent to the channel
+
+        """
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+        
+        embed = discord.Embed(
+                            title="Finesse",
+                            description=question,
+                            color=discord.Color.teal(),
+                            timestamp=ctx.message.created_at)
+        await ctx.channel.send(embed=embed)
+        try:
+            answer = await self.bot.wait_for("message",check=check,timeout=300)
+        except asyncio.TimeoutError:
+            await ctx.channel.send("You have ran out of time.")
+            return None # Returns none if no input is returned
+        return answer.content
 
     @commands.command()
     @commands.cooldown(2,10,type=commands.BucketType.channel)
@@ -115,7 +152,7 @@ class staffcom(commands.Cog):
             return
         try: float(args[0]) # checks if its a decimal as all rule numbers are decimals
         except Exception: # error handler
-            embed=discord.Embed(title="Error!",description=f"{args[0]} is not a number!, Try again",color=discord.Color.red())
+            embed=discord.Embed(title="Error!",description=f"{args[0]} is not a number!, Try again",color=discord.Color.red()) # constructs the embed  
             await ctx.send(embed=embed)
             return
         try: rule_string = self.rules[args[0]]
@@ -152,15 +189,33 @@ class staffcom(commands.Cog):
         print("roles used")
         await self.bot.get_channel(567462624355155988).send(f"{member.mention} Promoted To Trainee,Check out <#567466338617131010>, <#582968437018460165> and <#567466355629096980>")
 
+    @commands.has_any_role(615624883405324289,547780757251424258)
+    @commands.command()
+    async def bl(self, ctx, member: discord.Member, add_or_remove):
+        if add_or_remove == 'add':
+            push("insert into blacklist VALUES('%s','By <@%s>')",(member.id,ctx.author.id))
+            await ctx.send(f"<@{member.id}> has been added to the blacklist.")
+        if add_or_remove == 'remove':
+            push("delete from blacklist where uid = '%s'",(member.id,)) 
+            await ctx.send(f"<@{member.id}> has been removed from the blacklist.")
+
+ # ? S T A F F  VC  A C T I V I T Y  COMMAND
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def staff_activity(self,ctx):
+        data = pull("SELECT * FROM staffvc")
+        count = 0
+        embed = discord.Embed(title="Staff VC Activity")
+        for x in data:
+            count += 1
+            time = round(int(x[1]))
+            embed.add_field(name=f"{count}",value=f"User: <@{x[0]}> Time: {time}")
+        await ctx.author.send(embed=embed)
+        pull_one("truncate staffvc")
 
 
- # ? S T A F F  W A R N  S Y S T E M 
 
-
-
-
-
-# ? E N D  O F  S T A F F  W A R N  S Y S T E M 
 
     @commands.command()
     @commands.has_any_role(547784768981434395,547780757251424258,534098929617207326,534583040454688781)
@@ -249,34 +304,11 @@ class staffcom(commands.Cog):
             pass
 
 
-    @commands.command(alias="shadcopy")
-    @commands.is_owner()
-    async def copy(self, ctx):
-        def get_all_file_paths(directory): 
-    
-    # initializing empty file paths list 
-            file_paths = [] 
+        
 
-    # crawling through directory and subdirectories 
-            for root, directories, files in os.walk(directory): 
-                for filename in files: 
-            # join the two strings in order to form the full filepath. 
-                    filepath = os.path.join(root, filename) 
-                    file_paths.append(filepath) 
-            return file_paths
-        print("current num of files is {}".format(self.num))
-        direct = "/home/shadbot"
-        file_paths = get_all_file_paths(direct)
-        for file_name in file_paths: 
-            print(file_name) 
 
-        with zipfile.ZipFile(f'/home/PRbot/{self.num}.zip','w') as zip2:
-            for file in file_paths: 
-                zip2.write(file) 
-        dfile = discord.File(f"/home/PRbot/{self.num}.zip")
-        await ctx.author.send(content=f"Copy #{self.num}", file=dfile)
-        self.num += 1
 
+        
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -385,41 +417,6 @@ class staffcom(commands.Cog):
 #STAFF CUSTOM COMMANDS ------------------------------------------------------------------------------------------------------------------------
         
         
-
-
-    
-    @commands.guild_only()
-    @commands.has_role(637352105375694851)
-    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    @commands.command()
-    async def bank(self, ctx, member: discord.Member=None):
-        if not member:
-            plz = discord.Embed(title="Finesse", description="Please Specify A Member To Give This Role")
-            plz.set_footer(text="Made By ShaD")
-            await ctx.send(embed=plz)
-            return
-        role = ctx.guild.get_role(673609333677752392)
-        await member.add_roles(role)
-        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Invested, Thank You."))
-        embed.set_footer(text="Finesse!")
-        await ctx.send(embed=embed)
-
-    @commands.guild_only()
-    @commands.has_role(637352105375694851)
-    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    @commands.command()
-    async def rbank(self, ctx, member: discord.Member=None):
-        if not member:
-            plz = discord.Embed(title="Finesse", description="Please Specify A Member To Give This Role")
-            plz.set_footer(text="Made By ShaD")
-            await ctx.send(embed=plz)
-            return
-        role = ctx.guild.get_role(673609333677752392)
-        await member.remove_roles(role)
-        embed = discord.Embed(title="Finesse", description=(f"{member.mention} Has Stopped Payments. Given By {ctx.author.mention}"))
-        embed.set_footer(text="Finesse!")
-        await ctx.send(embed=embed)
-
 
 
     @commands.guild_only()

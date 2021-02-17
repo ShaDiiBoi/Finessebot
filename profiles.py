@@ -5,46 +5,51 @@ import os.path
 import discord
 from discord.ext import commands
 import re
+import time as tx
 from collections.abc import Sequence
 import asyncio
 import mysql.connector
+import gc
 
 
 
-def pull(*args):
-    mydb = mysql.connector.connect(
-                    host="localhost",
-                    user="shad",
-                    passwd="shadii",
-                    database="finesse",
-                    )
-    dbcursor = mydb.cursor(buffered=True)
-    dbcursor.execute(*args)
-    
-    results = dbcursor.fetchall()
-    mydb.commit()
-    return results
-
-def pull_one(*args):
-    mydb = mysql.connector.connect(
-                    host="localhost",
-                    user="shad",
-                    passwd="shadii",
-                    database="finesse")
-    dbcursor = mydb.cursor(buffered=True)
-    dbcursor.execute(*args)
-    
-    results = dbcursor.fetchone()
-    mydb.commit()
-    return results
 
 
+def profile_exists(uid):
+    exist = os.path.exists(path= f"/home/shadbot/prof_data/{uid}.json")
+    if exist: return True
+    else: return False
 
+def is_cooldown_finished(roles,user_time): #HASNT BEEN EDITED YET
+    time_waited = int(tx.time()-user_time)
+    print(time_waited)
+    if 585530183717748752 in roles:
+        x = 21600 # charmboost
+        
+        if time_waited > x: return True
+        else: return False
+    if 515567432799092737 in roles and 515567433453666304 not in roles and 568708508833415189 not in roles:#charm norm
+        x = 28800# charm211747
+        if time_waited > x: return True
+        else: return False 
+    if 515567433453666304 in roles and 515567432799092737 not in roles and 568708508833415189 not in roles: # charm plus
+        x = 14400 #Charm +
+        if time_waited > x: return True
+        else: return False 
+    if 568708508833415189 in roles and 515567433453666304 not in roles and 515567432799092737 not in roles:#charm plus plus
+        x = 7200 #Charm ++
+        if time_waited > x: return True
+        else: return False 
+    if 568708508833415189 not in roles and 515567433453666304 not in roles and 515567432799092737 not in roles:
+        x = 172800
+        if time_waited > x: return True
+        else: return False
 
 class profiles(commands.Cog):
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot = bot 
+        memory_collect.start()
         self.banned_words = ["sexuality", "girlfriend","looking","status",
                         "boyfriend","relationship","single","taken",
                         "not looking","gay","straight","lesbian",
@@ -58,12 +63,16 @@ class profiles(commands.Cog):
             "yellow": 0xff656d,
             "blue": 0xff656d,
             "gold": 0xff656d,
-            
-
+        
         }
         
 
-
+    @tasks.loop(seconds=300)
+    async def memory_collect(self):
+        print(gc.get_count())
+        print("collecting..")
+        gc.collect()
+        print(gc.get_count())
     @commands.Cog.listener()
     async def on_raw_reaction_add(self,payload):
         def make_sequence(seq):
@@ -141,8 +150,14 @@ class profiles(commands.Cog):
                 
                 path= f"/home/shadbot/prof_data/{member.id}.json"
                 exist = os.path.exists(path)
-                if not exist:
-                    await user.send("You Have Not Created A Profile, Check <#615342434146058252>")
+                if not profile_exists(member.id):
+                    error_embed = discord.Embed(
+                        title="Error Occured!",
+                        description="Sorry but you have not created a profile, please check <#629769781658124299> to create one",
+                        color=discord.Color.teal(),
+                        timestamp=datetime.datetime.now()
+                    )
+                    await user.send(embed=error_embed)
                     return
 
                 with open(path2, "r+") as f:
@@ -167,12 +182,12 @@ class profiles(commands.Cog):
                                 normalembed.set_thumbnail(url=str(info["imageurl"]))
                             if "imageurl" not in info:
                                 normalembed.set_thumbnail(url=str(user.avatar_url))
-                            if fver in member.roles or mver in member.roles or otherver in member.roles: normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
-                            else: normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            if fver in member.roles or mver in member.roles or otherver in member.roles: normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
+                            else: normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                             normalembed.add_field(name="Age", value=info["Age"], inline=True)
                             normalembed.add_field(name="Gender", value=info["gender"], inline=True)
                             
-                            print("field works")
+                            #"field works")
                             normalembed.add_field(name="Interests",value=interestString, inline=False)
                             normalembed.add_field(name="Location", value=info["location"], inline=True)
                             
@@ -190,13 +205,13 @@ class profiles(commands.Cog):
                                 normalembed.set_thumbnail(url=str(user.avatar_url))
                                 
                             if fver in member.roles or mver in member.roles or otherver in member.roles:
-                                normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                                normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                             else:
-                                normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                                normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                             normalembed.add_field(name="Age", value=info["Age"], inline=True)
                             normalembed.add_field(name="Gender", value=info["gender"], inline=True)
                             
-                            print("field works")
+                            #"field works")
                             normalembed.add_field(name="Location", value=info["location"], inline=True)
                             normalembed.add_field(name="Interests",value=interestString, inline=False)
                             normalembed.add_field(name="Hobbies", value=info["hobbies"], inline=True)
@@ -213,13 +228,13 @@ class profiles(commands.Cog):
                                 normalembed.set_thumbnail(url=str(user.avatar_url))
                                 
                             if fver in member.roles or mver in member.roles or otherver in member.roles:
-                                normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                                normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                             else:
-                                normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                                normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                             normalembed.add_field(name="Age", value=info["Age"], inline=True)
                             normalembed.add_field(name="Gender", value=info["gender"], inline=True)
                             
-                            print("field works")
+                            #"field works")
                             normalembed.add_field(name="Location", value=info["location"], inline=True)
                             normalembed.add_field(name="Interests",value=interestString, inline=False)
                             normalembed.add_field(name="Hobbies", value=info["hobbies"], inline=True)
@@ -279,14 +294,14 @@ class profiles(commands.Cog):
                             normalembed.set_thumbnail(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         normalembed.add_field(name="Age", value=info["Age"], inline=True)
                         normalembed.add_field(name="Gender", value=info["gender"], inline=True)
                         
                         normalembed.add_field(name="Interests",value=interestString, inline=False)
-                        print("field works")
+                        #"field works")
                         normalembed.add_field(name="Location", value=info["location"], inline=True)
                         
                         normalembed.add_field(name="Hobbies", value=info["hobbies"], inline=True)
@@ -303,13 +318,13 @@ class profiles(commands.Cog):
                             normalembed.set_thumbnail(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         normalembed.add_field(name="Age", value=info["Age"], inline=True)
                         normalembed.add_field(name="Gender", value=info["gender"], inline=True)
                         
-                        print("field works")
+                        #"field works")
                         normalembed.add_field(name="Interests",value=interestString, inline=False)
                         normalembed.add_field(name="Location", value=info["location"], inline=True)
                         
@@ -318,7 +333,7 @@ class profiles(commands.Cog):
                         
                         normalembed.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
 
-                    print("footter works")
+                    #"footter works")
                     #If for sending normals
                     mes = await newchan.send(f"{user.mention}",embed=normalembed)
                     await user.send("Your profile has been saved and posted!.")
@@ -362,13 +377,13 @@ class profiles(commands.Cog):
                         info = json.load(info)
 
                     if "pink" in colorcode.content.lower():
-                        print("work damn you")
+                        #"work damn you")
 
                         #
                         charm = discord.Embed(title=f"Finesse Profile bot",description=f"**Discord User**:{full} **Gender:** {info['gender']} **Age:** {info['Age']}", color=0xff89ff)
-                        print("normal  works")
+                        #"normal  works")
                         charm.set_author(name=f"{user.id}")
-                        print("author  works")
+                        #"author  works")
                         if "imageurl" in info:
                             
                             charm.set_thumbnail(url=str(info["imageurl"]))
@@ -376,9 +391,9 @@ class profiles(commands.Cog):
                             charm.set_thumbnail(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         charm.add_field(name="Age", value=info["Age"], inline=True)
                         charm.add_field(name="Gender", value=info["gender"], inline=True)
                         charm.add_field(name="Interests",value=interestString, inline=False)
@@ -388,7 +403,7 @@ class profiles(commands.Cog):
                         charm.add_field(name="About Me", value=info["bio"], inline=False)
                         
                         charm.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
-                        print("footer works")
+                        #"footer works")
                         mes = await newchan.send(f"{user.mention}",embed=normalembed)
                         await user.send("Your profile has been saved and posted!.")
                         with open(path, "r+") as f:
@@ -406,7 +421,7 @@ class profiles(commands.Cog):
                         #
                         charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0xfff595)
                         charm.set_author(name=f"{user.id}")
-                        print("author  works")
+                        #"author  works")
                         if "imageurl" in info:
                             
                             charm.set_image(url=str(info["imageurl"]))
@@ -414,9 +429,9 @@ class profiles(commands.Cog):
                             charm.set_image(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         charm.add_field(name="Age", value=info["Age"], inline=True)
                         charm.add_field(name="Gender", value=info["gender"], inline=True)
                         charm.add_field(name="Interests",value=interestString, inline=False)
@@ -442,7 +457,7 @@ class profiles(commands.Cog):
                         # 
                         charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0x6aff8d)
                         charm.set_author(name=f"{user.id}")
-                        print("author  works")
+                        #"author  works")
                         if "imageurl" in info:
                             
                             charm.set_image(url=str(info["imageurl"]))
@@ -450,9 +465,9 @@ class profiles(commands.Cog):
                             charm.set_image(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596>**Not Verified** <:zplayroom_x:585586357783756820>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990>**Not Verified** <:zplayroom_x:585586357783756820>", inline=True)
                         charm.add_field(name="Age", value=info["Age"], inline=True)
                         charm.add_field(name="Gender", value=info["gender"], inline=True)
                         charm.add_field(name="Interests",value=interestString, inline=False)
@@ -479,7 +494,7 @@ class profiles(commands.Cog):
                         #
                         charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0xc1a7ff)
                         charm.set_author(name=f"({user.id})")
-                        print("author  works")
+                        #"author  works")
                         if "imageurl" in info:
                             
                             charm.set_image(url=str(info["imageurl"]))
@@ -487,9 +502,9 @@ class profiles(commands.Cog):
                             charm.set_image(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         charm.add_field(name="Age", value=info["Age"], inline=True)
                         charm.add_field(name="Gender", value=info["gender"], inline=True)
                         charm.add_field(name="Interests",value=interestString, inline=False)
@@ -514,7 +529,7 @@ class profiles(commands.Cog):
                         #
                         charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0xff656d)
                         charm.set_author(name=f"{user.id}")
-                        print("author  works")
+                        #"author  works")
                         if "imageurl" in info:
                             
                             charm.set_image(url=str(info["imageurl"]))
@@ -522,9 +537,9 @@ class profiles(commands.Cog):
                             charm.set_image(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         charm.add_field(name="Age", value=info["Age"], inline=True)
                         charm.add_field(name="Gender", value=info["gender"], inline=True)
                         charm.add_field(name="Interests",value=interestString, inline=False)
@@ -549,7 +564,7 @@ class profiles(commands.Cog):
                         #
                         charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0x8fd2ff)
                         charm.set_author(name=f"{user.id}")
-                        print("author  works")
+                        #"author  works")
                         if "imageurl" in info:
                             
                             charm.set_image(url=str(info["imageurl"]))
@@ -557,11 +572,11 @@ class profiles(commands.Cog):
                             charm.set_image(url=str(user.avatar_url))
                             
                         if fver in member.roles or mver in member.roles or otherver in member.roles:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                         else:
-                            charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                            charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                         
-                        print("image works")
+                        #"image works")
                         charm.add_field(name="Age", value=info["Age"], inline=True)
                         charm.add_field(name="Gender", value=info["gender"], inline=True)
                         charm.add_field(name="Interests",value=interestString, inline=False)
@@ -602,21 +617,21 @@ class profiles(commands.Cog):
                             await user.send("This Isnt Working, Retry The Command And Contact A Developer")
                             return
                         await user.send("What color do you wish your profile embed to have?, find a color hex,copy the hex and paste it here without the hashtag, eg `74ff00` from `#74ff00` \nhttps://htmlcolorcodes.com/color-picker/\n Red: ff656d\n Pink: ff89ff\n Blue: 8fd2ff\n Purple: c1a7ff\n Green: 6aff8d\n Yellow: fff595\n ")
-                        print("sends the color message")
+                        #"sends the color message")
                         colorcode = await self.bot.wait_for("message", check=check)
                         smh = f"0x{colorcode.content}"
                         try:
                             color = discord.Colour(int(smh, 16))
                         except Exception as e:
-                            print(f"Color Convert Has Failed, Reason == {e}")
+                            #f"Color Convert Has Failed, Reason == {e}")
                             await user.send("Color Convert Failed, Try Again")
                             continue
                         else:
                             break
                     charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=color)
-                    print("original works")
+                    #"original works")
                     charm.set_author(name=f"{user.name}, {user.id}")
-                    print("author works")
+                    #"author works")
                     if "imageurl" in info:
                         
                         charm.set_image(url=str(info["imageurl"]))
@@ -624,10 +639,10 @@ class profiles(commands.Cog):
                         charm.set_image(url=str(user.avatar_url))
                         
                     if fver in member.roles or mver in member.roles or otherver in member.roles:
-                        charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                        charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                     else:
-                        charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
-                    print("thumbnail works")
+                        charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
+                    #"thumbnail works")
                     charm.add_field(name="Age", value=info["Age"], inline=True)
                     charm.add_field(name="Gender", value=info["gender"], inline=True)
                     charm.add_field(name="Interests",value=interestString, inline=False)
@@ -638,7 +653,7 @@ class profiles(commands.Cog):
                     
                     charm.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
                     color = colorcode.content
-                    print("embed works")
+                    #"embed works")
                     await newchan.send(f"{user.mention}",embed=charm)
                     await user.send("Your profile has been saved and posted!.")
                     with open(path, "r+") as f:
@@ -664,9 +679,9 @@ class profiles(commands.Cog):
 
 
                 normalembed = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0x80646b)
-                print("original works")
+                #"original works")
                 normalembed.set_author(name=f"{user.id}")
-                print("author works")
+                #"author works")
                 if "imageurl" in info:
                     normalembed.set_thumbnail(url=str(info["imageurl"]))
                 if "imageurl" not in info:
@@ -674,14 +689,14 @@ class profiles(commands.Cog):
                 
                     
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
-                print("thumbnail works")
+                    normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
+                #"thumbnail works")
                 normalembed.add_field(name="Age", value=info["Age"], inline=True)
                 normalembed.add_field(name="Gender", value=info["gender"], inline=True)
                 
-                print("field works")
+                #"field works")
                 normalembed.add_field(name="Interests",value=interestString, inline=False)
                 normalembed.add_field(name="Location", value=info["location"], inline=True)
                 
@@ -689,7 +704,7 @@ class profiles(commands.Cog):
                 normalembed.add_field(name="About Me", value=info["bio"], inline=False)
                 
                 normalembed.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
-                print("footter works")
+                #"footter works")
                 #If for sending normals
                 await newchan.send(f"{user.mention}",embed=charm)
                 await user.send("Your profile has been saved and posted!.")
@@ -704,7 +719,7 @@ class profiles(commands.Cog):
             
                 
             
-                print("shad u did it so proud")
+                #"shad u did it so proud")
                 path = os.path.join("/home/shadbot/prof_data/", f"{user.id}.json")
             
                 with open(path2, "w+") as write:
@@ -723,7 +738,7 @@ class profiles(commands.Cog):
                 await message.remove_reaction(payload.emoji, member)
                 path = os.path.join("/home/shadbot/prof_data/", f"{user.id}.json")
                 exist = os.path.exists(path) # Edit Function -------------------------
-                print("right emoji")
+                #"right emoji")
                 if not exist:
                     await user.send("You Have Not Created A Profile, Check <#615342434146058252>")
                     return
@@ -735,16 +750,16 @@ class profiles(commands.Cog):
                     charm.set_author(name="Finesse")
                     await user.send(embed=charm)
                     img = await self.bot.wait_for("message", check=check, timeout=900.00)
-                    print("msg ttaken")
+                    #"msg ttaken")
                     if img.attachments:
-                        print("It Is A IMage")
+                        #"It Is A IMage")
                         resp = discord.Embed(description="Good Work!, Please Wait While We Finish Up!")
                         await user.send(embed=resp)
-                        print("Embed Works")
+                        #"Embed Works")
                         imgfile = img.attachments[0]
-                        print("imgfil dont work")
+                        #"imgfil dont work")
                         imglink = imgfile.url
-                        print("Works")
+                        #"Works")
                         with open(path, "r+") as f:
                             data = json.load(f)
                             data["imageurl"] = f"{str(imglink)}"
@@ -762,16 +777,16 @@ class profiles(commands.Cog):
                     charm.set_author(name="Finesse")
                     await user.send(embed=charm)
                     img = await self.bot.wait_for("message", check=check, timeout=900.00)
-                    print("msg ttaken")
+                    #"msg ttaken")
                     if img.attachments:
-                        print("It Is A IMage")
+                        #"It Is A IMage")
                         resp = discord.Embed(description="Good Work!, Please Wait While We Finish Up!")
                         await user.send(embed=resp)
-                        print("Embed Works")
+                        #"Embed Works")
                         imgfile = img.attachments[0]
-                        print("imgfil dont work")
+                        #"imgfil dont work")
                         imglink = imgfile.url
-                        print("Works")
+                        #"Works")
                         with open(path, "r+") as f:
                             data = json.load(f)
                             data["imageurl"] = f"{str(imglink)}"
@@ -822,7 +837,7 @@ class profiles(commands.Cog):
                 await message.remove_reaction(payload.emoji, member)
                 path = os.path.join("/home/shadbot/prof_data/", f"{user.id}.json")
                 exist = os.path.exists(path) # Edit Function -------------------------
-                print("right emoji")
+                #"right emoji")
                 if not exist:
                     await user.send("You Have Not Created A Profile, Check <#615342434146058252>")
                     return
@@ -831,7 +846,7 @@ class profiles(commands.Cog):
                 charm.set_author(name=f"{user.id}")
                 charm.set_thumbnail(url=str(user.avatar_url))
                 charm.add_field(name="Name", value=":one:")
-                charm.add_field(name="Reload Base Roles(Only Choose This If You Changed Your Roles That Are Display On Your Profile)", value=":two:")
+                charm.add_field(name="Reload Base Roles(Only Choose This If You Changed Your Roles That Are Displayed On Your Profile)", value=":two:")
                 charm.add_field(name="Biography", value=":three:")
                 charm.add_field(name="Hobbies", value=":four:")
                 charm.add_field(name="Location", value=":five:")
@@ -884,13 +899,9 @@ class profiles(commands.Cog):
                             await user.send("Please Reply With Your Gender")
                             gender_event = await self.bot.wait_for("message",check=check)
                             gender = gender_event.content
-
-                        if closed in member.roles:
-                            dm = "DM's Closed"
-                        if open1 in member.roles:
-                            dm = "DM's Open"
-                        if ask in member.roles:
-                            dm = "Ask To DM"
+                        role_id_list = [role.id for role in member.roles]
+                        dm_status_list = [role.name for role in finesse.roles if role.name.startswith("DM |") and role.id in role_id_list]
+                        dm = dm_status_list[0]
                         await user.send("What Age Are You")
                         ageGen = await self.bot.wait_for("Message",check=check)
                         age = ageGen.content
@@ -905,6 +916,7 @@ class profiles(commands.Cog):
                             json.dump(data, dat)
                             dat.truncate()
                         await editmsg.edit(content="Roles Are Reloaded!",suppress=True)
+                        return
                         #BIOGRAPHY
                     if str(reaction.emoji) == "3\N{combining enclosing keycap}":
                         for x in range(4):
@@ -974,7 +986,7 @@ class profiles(commands.Cog):
                 if member.id in embed.author.name:
                     await message.delete()
     
-            print("Purged.exe")
+            #"Purged.exe")
         
         
 
@@ -984,7 +996,7 @@ class profiles(commands.Cog):
     @commands.has_any_role(547780757251424258,547784731157200927,547784768981434395)
     async def resetme(self,ctx):
         path = os.path.join("/home/shadbot/prof_data", f"{ctx.author.id}.json")
-        print(path)
+        #path)
         exist = os.path.exists(path)
         if exist:
             os.remove(path)
@@ -996,7 +1008,7 @@ class profiles(commands.Cog):
     @commands.has_any_role(547780757251424258,547784731157200927,547784768981434395)
     async def profilereset(self,ctx, uid):
         path = os.path.join("/home/shadbot/prof_data", f"{uid}.json")
-        print(path)
+        #path)
         exist = os.path.exists(path)
         if exist:
             os.remove(path)
@@ -1089,15 +1101,15 @@ class profiles(commands.Cog):
         path2 = f"/home/shadbot/bump_check/{ctx.author.id}.json"
 
   
-        user_interests = [role for role in finesse.roles if role.startswith("Likes") and role in member.roles]
+        user_interests = [role for role in finesse.roles if role.name.startswith("Likes") and role in member.roles]
         interests_names = [i.name[6:] for i in user_interests]
         interestString = " ,".join(interests_names)
 
 
         #ERROR HANDLER MINI
-        profile_exist_check = pull_one(f"SELECT FROM profiles WHERE uid = '{str(member.id)}'")
-        if len(profile_exist_check) > 0:
-            error_embed = discord.embed(
+        
+        if profile_exist_check is not None:
+            error_embed = discord.Embed(
                 title="Error!",
                 description="You have already made a profile. try bumping instead or ask a staff to remove your profile if you think this is a error.",
                 color=discord.Color.teal())
@@ -1136,9 +1148,12 @@ class profiles(commands.Cog):
         female = finesse.get_role(547923211699093532)
         other = finesse.get_role(547851482045874178)
 
-
+        newchan = finesse.get_channel(566474557834395659)
 
         #dm status
+        
+        # Age role
+        
         dm_roles = ",".join((role.name) for role in finesse.roles if role.name.startswith("Dm's ~") and role in member.roles) # gets all dm status roles in members rolelist
        
     # -----------------------------------------------------------------------------------------------------------------------
@@ -1150,10 +1165,10 @@ class profiles(commands.Cog):
 
             
 
-            print("sends user message1")
+            #"sends user message1")
 
             color1 = await self.bot.wait_for("message", check=check)
-            print("sends user message2")
+            #"sends user message2")
             await user.send("What Is Your Name?")
 
             name = await self.bot.wait_for("message", check=check)
@@ -1176,7 +1191,7 @@ class profiles(commands.Cog):
                     break
             await user.send("Where Are You From?")
             locations = await self.bot.wait_for("message", check=check)
-            print("all questions asked")
+            #"all questions asked")
 
             age = "N/A"
             
@@ -1191,7 +1206,7 @@ class profiles(commands.Cog):
             hobcon = hob.content
             locationcon = locations.content
             colorcon = color1.content
-            print("poss1")
+            #"poss1")
 
             # charm
             await user.send("What Age Are You")
@@ -1199,7 +1214,7 @@ class profiles(commands.Cog):
             age = ageGen.content
 
 
-            print("poss2")
+            #"poss2")
 
             # Gender
             if female in member.roles:
@@ -1212,19 +1227,14 @@ class profiles(commands.Cog):
                 await user.send("Please Reply With Your Gender")
                 gender_event = await self.bot.wait_for("message",check=check)
                 gender = gender_event.content
-            print("poss3")
+            #"poss3")
 
             
-            print("poss5")
+            #"poss5")
 
             # DM Status
-            if closed in member.roles:
-                dm = "DM's Closed"
-            if open1 in member.roles:
-                dm = "DM's Open"
-            if ask in member.roles:
-                dm = "Ask To DM"
-            print("poss6")
+            dm = dm_roles
+            #"poss6")
             info_list = [namcon,gender,hobcon,biocon,age,locationcon]
             for string in info_list:
                 mystr = string.lower()
@@ -1247,27 +1257,26 @@ class profiles(commands.Cog):
                     
                     "location": locationcon,
                     "DM Status": dm,
-                    "color": colorcon
+                    "color": colorcon,
+                    "time": int(tx.time())
                     }
-            print("dict problem")
-            print("so proud shad iwuwuwuuw")
-
+     
         
 
             if "pink" in color1.content.lower():
-                print("work damn you")
+                #"work damn you")
 
                 #
                 
                 charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0xff89ff)
                 charm.set_author(name=f"{ctx.author.id}")
-                print("author  works")
+                #"author  works")
                 charm.set_image(url=str(ctx.author.avatar_url))
-                print("image works")
+                #"image works")
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                 charm.add_field(name="Age", value=info["Age"], inline=True)
                 charm.add_field(name="Gender", value=info["gender"], inline=True)
                 charm.add_field(name="Interests",value=interestString, inline=False)
@@ -1278,7 +1287,7 @@ class profiles(commands.Cog):
                 charm.add_field(name="About Me", value=info["bio"], inline=False)
                 
                 charm.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
-                print("footer works")
+                #"footer works")
                 await newchan.send(f"{user.mention}",embed=charm)
                 await user.send("Your profile has been saved and posted!.")
                 
@@ -1292,9 +1301,9 @@ class profiles(commands.Cog):
                 charm.set_author(name=f"{ctx.author.id}")
                 charm.set_image(url=str(ctx.author.avatar_url))
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                 charm.add_field(name="Age", value=info["Age"], inline=True)
                 charm.add_field(name="Gender", value=info["gender"], inline=True)
                 charm.add_field(name="Interests",value=interestString, inline=False)
@@ -1320,9 +1329,9 @@ class profiles(commands.Cog):
                 
                     
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                 charm.add_field(name="Age", value=info["Age"], inline=True)
                 charm.add_field(name="Gender", value=info["gender"], inline=True)
                 charm.add_field(name="Interests",value=interestString, inline=False)
@@ -1344,9 +1353,9 @@ class profiles(commands.Cog):
                 
                     
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                 charm.add_field(name="Age", value=info["Age"], inline=True)
                 charm.add_field(name="Gender", value=info["gender"], inline=True)
                 charm.add_field(name="Interests",value=interestString, inline=False)
@@ -1367,9 +1376,9 @@ class profiles(commands.Cog):
                 
                     
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                 charm.add_field(name="Age", value=info["Age"], inline=True)
                 charm.add_field(name="Gender", value=info["gender"], inline=True)
                 charm.add_field(name="Interests",value=interestString, inline=False)
@@ -1393,9 +1402,9 @@ class profiles(commands.Cog):
                 
                     
                 if fver in member.roles or mver in member.roles or otherver in member.roles:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
                 else:
-                    charm.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
+                    charm.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
                 charm.add_field(name="Age", value=info["Age"], inline=True)
                 charm.add_field(name="Gender", value=info["gender"], inline=True)
                 charm.add_field(name="Interests",value=interestString, inline=False)
@@ -1431,7 +1440,7 @@ class profiles(commands.Cog):
 
 
 
-            print("sends the color message")
+            #"sends the color message")
             for x in range(4):
                 if x == 4:
                     await user.send("You Took Too Many Tries, Redo The Command")
@@ -1445,10 +1454,10 @@ class profiles(commands.Cog):
                 else:
                     break
                 
-            print("saved colorcode")
+            #"saved colorcode")
             await user.send("What Is Your Name?")
             name = await self.bot.wait_for("message", check=check)
-            print("name saved")
+            #"name saved")
             
             
             
@@ -1457,7 +1466,7 @@ class profiles(commands.Cog):
             await user.send("What Are Your Hobbies?")
             
             hob = await self.bot.wait_for("message", check=check)
-            print("hobbies done")
+            #"hobbies done")
             for x in range(4):
                 if x == 4:
                     await user.send("You Are struggling too hard with this, retry later")
@@ -1475,26 +1484,26 @@ class profiles(commands.Cog):
             
             await user.send("Where Are You From?")
             locations = await self.bot.wait_for("message", check=check)
-            print("all questions asked")
+            #"all questions asked")
 
 
             gender = "N/A"
-            print("gender works")
+            #"gender works")
             dm = "N/A"
-            print("dm stat works")
+            #"dm stat works")
             namcon = name.content
-            print("namcon")
-            print("prefcn")
+            #"namcon")
+            #"prefcn")
             biocon = bio.content
-            print("biocon")
+            #"biocon")
             hobcon = hob.content
-            print("hobcon")
+            #"hobcon")
             locationcon = locations.content
-            print("loccon")
+            #"loccon")
 
             fincolor = await commands.ColourConverter().convert(ctx, colorcode.content)
-            print("fincolorcon")
-            print("poss1")
+            #"fincolorcon")
+            #"poss1")
 
             # charm
 
@@ -1503,7 +1512,7 @@ class profiles(commands.Cog):
             age = ageGen.content
 
 
-            print("poss2")
+            #"poss2")
 
             # Gender
             if female in member.roles:
@@ -1516,7 +1525,7 @@ class profiles(commands.Cog):
                 await user.send("Please Reply With Your Gender")
                 gender_event = await self.bot.wait_for("message",check=check)
                 gender = gender_event.content
-            print("poss3")
+            #"poss3")
 
             # Dating Status
             
@@ -1524,13 +1533,8 @@ class profiles(commands.Cog):
 
             
             # DM Status
-            if closed in member.roles:
-                dm = "DM's Closed"
-            if open1 in member.roles:
-                dm = "DM's Open"
-            if ask in member.roles:
-                dm = "Ask To DM"
-            print("poss6")
+            dm = dm_roles
+            #"poss6")
 
             # F I N I S H E D
             info_list = [namcon,gender,hobcon,biocon,age,locationcon]
@@ -1553,20 +1557,20 @@ class profiles(commands.Cog):
                     "location": locationcon,
                     "DM Status": dm,
                     }
-            print("dict problem")
+            #"dict problem")
             
-            print("so proud shad iwuwuwuuw")
+            #"so proud shad iwuwuwuuw")
 
             
             
-            print("Dumped")
+            #"Dumped")
             
             charm = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=fincolor)
-            print("original works")
+            #"original works")
             charm.set_author(name=f" {ctx.author.id}")
-            print("author works")
+            #"author works")
             charm.set_image(url=str(ctx.author.avatar_url))
-            print("thumbnail works")
+            #"thumbnail works")
             charm.add_field(name="Age", value=info["Age"], inline=True)
             charm.add_field(name="Gender", value=info["gender"], inline=True)
             charm.add_field(name="Location", value=info["location"], inline=True)
@@ -1574,7 +1578,7 @@ class profiles(commands.Cog):
             charm.add_field(name="Hobbies", value=info["hobbies"], inline=True)
             charm.add_field(name="About Me", value=info["bio"], inline=False)
             charm.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
-            print("embed works")
+            #"embed works")
             await newchan.send(f"{user.mention}",embed=charm)
             await user.send("Your profile has been saved and posted!.")
             
@@ -1608,7 +1612,7 @@ class profiles(commands.Cog):
         await user.send("What Is Your Name?")
         name = await self.bot.wait_for("message", check=check)
         
-        print("sends user message1")
+        #"sends user message1")
 
         
         
@@ -1629,7 +1633,7 @@ class profiles(commands.Cog):
                 break
         await user.send("Where Are You From?")
         locations = await self.bot.wait_for("message", check=check)
-        print("all questions asked")
+        #"all questions asked")
 
         age = "N/A"
         
@@ -1647,7 +1651,7 @@ class profiles(commands.Cog):
         biocon = bio.content
         hobcon = hob.content
         locationcon = locations.content
-        print("poss1")
+        #"poss1")
 
 
 
@@ -1681,7 +1685,7 @@ class profiles(commands.Cog):
             
         
         
-        print("poss4")
+        #"poss4")
 
         #sexuality
         
@@ -1696,18 +1700,14 @@ class profiles(commands.Cog):
             
         
         
-        print("poss5")
+        #"poss5")
 
 
 
         #DM Status
-        if closed in member.roles:
-            dm = "DM's Closed"
-        if open1 in member.roles:
-            dm = "DM's Open"
-        if ask in member.roles:
-            dm = "Ask To DM"
-        print("poss6")
+        
+        dm = dm_roles
+        #"poss6")
 
 
         info_list = [namcon,gender,hobcon,biocon,age,locationcon]
@@ -1735,28 +1735,28 @@ class profiles(commands.Cog):
                 "location": locationcon,
                 "DM Status": dm
             }
-        print("dict problem")
+        #"dict problem")
         
-        print("so proud shad iwuwuwuuw")
+        #"so proud shad iwuwuwuuw")
 
         
 
         # E M B E D
         normalembed = discord.Embed(title=f"Finesse Profile bot", description=f"**Discord User**:{full} ,**Name:**  {info['name']}", color=0x80646b)
-        print("original works")
+        #"original works")
         normalembed.set_author(name=f"{ctx.author.id}")
-        print("author works")
+        #"author works")
         normalembed.set_thumbnail(url=str(ctx.author.avatar_url))
         
             
         if fver in member.roles or mver in member.roles or otherver in member.roles:
-            normalembed.add_field(name="Verification Level", value="<:zfinesse_check:586535746081390596> **Selfie Verified** <:zfinesse_check:586535746081390596>", inline=True)
+            normalembed.add_field(name="Verification Level", value="<:zfinesse_check:695225075325992990> **Selfie Verified** <:zfinesse_check:695225075325992990>", inline=True)
         else:
-            normalembed.add_field(name="Verification Level", value="<:zfinesse_x:586535746500952077> **Not Verified** <:zfinesse_x:586535746500952077>", inline=True)
-        print("thumbnail works")
+            normalembed.add_field(name="Verification Level", value="<:finesse_x:695225262052474921> **Not Verified** <:finesse_x:695225262052474921>", inline=True)
+        #"thumbnail works")
         normalembed.add_field(name="Age", value=info["Age"], inline=True)
         normalembed.add_field(name="Gender", value=info["gender"], inline=True)
-        print("field works")
+        #"field works")
         normalembed.add_field(name="Interests",value=interestString, inline=False)
         normalembed.add_field(name="Location", value=info["location"], inline=True)
         
@@ -1764,7 +1764,7 @@ class profiles(commands.Cog):
         normalembed.add_field(name="About Me", value=info["bio"], inline=False)
         
         normalembed.set_footer(text=info["DM Status"], icon_url="https://i.imgur.com/IPPs67V.png")
-        print("footter works")
+        #"footter works")
         #If for sending normals
         mes = await newchan.send(f"{user.mention}",embed=normalembed)
         await user.send("Your profile has been saved and posted!.")
@@ -1773,7 +1773,7 @@ class profiles(commands.Cog):
 
         
 
-        print("shad u did it so proud")
+        #"shad u did it so proud")
         path = os.path.join("/home/shadbot/prof_data/", f"{ctx.author.id}.json")
         with open(path, "w") as write:
             json.dump(info, write,indent=4)
@@ -1829,7 +1829,7 @@ class profiles(commands.Cog):
             await ctx.author.send("You Cant Use This Command As You Do Not Have Your Roles Set Up, You Also Need One Interest Role, So Make Sure That You Do, For Reference, You Dont Have One Of The Following Roles: \n ``` {}```".format(string_roles))
         else:
             await ctx.message.delete()
-            print(error)
+            #error)
 
 
 
@@ -1841,6 +1841,6 @@ class profiles(commands.Cog):
 
 
 def setup(bot):
-    print("Loading profile command System!")
+    #"Loading profile command System!")
     bot.add_cog(profiles(bot))
-    print("profile command sys loaded")
+    #"profile command sys loaded")

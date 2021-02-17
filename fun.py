@@ -12,6 +12,7 @@ from discord.ext import commands
 import asyncio
 from urllib.parse import urlparse
 import praw
+from difflib import get_close_matches
 from imgurpython import ImgurClient
 import mysql.connector
 
@@ -58,7 +59,6 @@ def pull(*args):
 
 
 
-
 class fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -66,10 +66,23 @@ class fun(commands.Cog):
         self.error_channel = bot.get_channel(596509055376162831)
         self.client_id = "0c30e0ce68c6213"
         self.secret = "e61ca8a36d88c6c9bbc6d47757bedcd7a5cffafca7de86699b36fe3bd06cbcf7"
-        self.banned_words = ["faggot","nigger","n1gger","niggers","n1ggers","fags","chinky","chinkys","horny","masturbate","cum"]
+        self.banned_words = ["faggot","nigger","n1gger","niggers","n1ggers","fags","chinky","horny","masturbate","cum","retard","retarded","coon"]
         
 
 
+    def blacklisted():
+        async def predicate(ctx):
+            
+            not_blacklisted = True
+            x = pull("select * from blacklist")
+            
+            for entry in x:
+                
+                if entry[0] == str(ctx.author.id):
+                    print("blacklisted user found")
+                    not_blacklisted = False
+            return not_blacklisted
+        return commands.check(predicate)
 
 
 
@@ -92,6 +105,7 @@ class fun(commands.Cog):
         embed = discord.Embed(colour=discord.Colour.gold())
         embed.set_image(url=ranimg.link)
         await ctx.send(embed=embed)
+        
 
     #-------------------------------------------------------------------------------------------------------------------------------
 
@@ -159,9 +173,9 @@ class fun(commands.Cog):
     
 
 
-
+    @blacklisted()
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.command()
     async def slap(self, ctx, user=None):
         with open("/home/shadbot/funurl.json","r+") as f:
@@ -182,7 +196,8 @@ class fun(commands.Cog):
         picked = random.choice(info["slapl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def poke(self, ctx, user=None):
@@ -206,7 +221,8 @@ class fun(commands.Cog):
         picked = random.choice(poss)
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def nom(self, ctx, user=None):
@@ -229,7 +245,8 @@ class fun(commands.Cog):
         picked = random.choice(info["noml"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def love(self, ctx, user=None):
@@ -251,7 +268,8 @@ class fun(commands.Cog):
         picked = random.choice(info["lovel"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def cry(self, ctx, user=None):
@@ -261,8 +279,8 @@ class fun(commands.Cog):
         picked = random.choice(info["cryl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def blush(self, ctx, user=None):
@@ -272,8 +290,8 @@ class fun(commands.Cog):
         picked = random.choice(info["blushl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def pat(self, ctx, user=None):
@@ -295,8 +313,8 @@ class fun(commands.Cog):
         picked = random.choice(info["patl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def shrug(self, ctx, user=None):
@@ -306,8 +324,8 @@ class fun(commands.Cog):
         picked = random.choice(info["shrugl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def smirk(self, ctx, user=None):
@@ -317,8 +335,8 @@ class fun(commands.Cog):
         picked = random.choice(info["smirkl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def squeeze(self, ctx, user=None):
@@ -340,8 +358,8 @@ class fun(commands.Cog):
         picked = random.choice(info["squeezel"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def lick(self, ctx, user=None):
@@ -363,8 +381,8 @@ class fun(commands.Cog):
         picked = random.choice(info["lickl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def kiss(self, ctx, user=None):
@@ -389,8 +407,8 @@ class fun(commands.Cog):
         picked = random.choice(info["kissl"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
- 
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def glare(self, ctx, user=None):
@@ -412,8 +430,8 @@ class fun(commands.Cog):
             embed.set_image(url=picked)
             await ctx.send(embed=embed)
             return
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def hug(self, ctx, user=None):
@@ -436,8 +454,8 @@ class fun(commands.Cog):
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
 
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
-
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
     @commands.command()
     async def cuddle(self, ctx, user=None):
@@ -459,8 +477,8 @@ class fun(commands.Cog):
         picked = random.choice(info["cuddlel"])
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
-
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @blacklisted()
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     @commands.cooldown(2, 10.00, type=commands.BucketType.member)
     @commands.command()
     async def bite(self, ctx, user=None):
@@ -483,10 +501,10 @@ class fun(commands.Cog):
         embed.set_image(url=picked)
         await ctx.send(embed=embed)
 
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(3, 10.00, type=commands.BucketType.channel)
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     async def ene(self, ctx):
 
         emoji = []
@@ -505,9 +523,9 @@ class fun(commands.Cog):
         embed.set_footer(text=f"ene")
         embed.set_image(url="https://i.imgur.com/JRzJ5L0.png")
         await ctx.send(embed=embed)
-
+    @blacklisted()
     @commands.command()
-    @commands.has_any_role(642811907417309186,642811877008736303,642811876975050791,642811871233048629642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
+    @commands.has_any_role(547792652029001737,534583040454688781,534098929617207326,378667625036644353,642811907417309186,642811877008736303,642811876975050791,642811871233048629,642811874983018536,642811874039169045,548846050056863756,586494766359904257,534098929617207326,547784768981434395,547780757251424258)
     async def welcome(self, ctx, member: discord.Member):
         
         appends = []
@@ -521,7 +539,7 @@ class fun(commands.Cog):
         #appends[2] IS SPARKLING HEARTS
         #
         embed.set_image(url="https://cdn.discordapp.com/attachments/566523946934075393/624931522708766742/ezgif-4-7e2de666a8dd.gif")
-        embed.add_field(name="<:zzzfinesse:622064373741125673> ", value=f"{appends[1]} Hi {member.mention} ♡, welcome to Finesse! Make sure you pick some roles in <#566514394612105216> We hope you enjoy your stay here {appends[0]} {appends[2]}  {appends[1]} ")
+        embed.add_field(name="<:zzzfinesse:622064373741125673> ", value=f"{appends[1]} Hi {member.mention} ♡, welcome to Finesse! Make sure you pick some roles in <#715615805571858493> and check out <#715636419959324672>!. We hope you enjoy your stay here {appends[0]} {appends[2]}  {appends[1]} ")
         embed.set_footer(icon_url="https://i.imgur.com/CKQU6PX.png")
         await ctx.send(embed=embed)
 
@@ -532,7 +550,21 @@ class fun(commands.Cog):
         if isinstance(error, commands.errors.MissingAnyRole):
             await ctx.send("You Are Missing The Required Roles To Use This Command Silly :)")
 
+    @blacklisted()
+    @commands.command()
+    @commands.cooldown(1, 5.0, type=commands.BucketType.default)
+    @commands.has_permissions(administrator=True)
+    async def shadnamechange(self, ctx,*,rolename):
+        shadsrole = ctx.guild.get_role(804855351744266292)
+        await shadsrole.edit(name=rolename)
+        embed = discord.Embed(title='Finesse', description=
+                        (f"Shad's role has been changed to `{rolename}`"),
+                        timestamp=ctx.message.created_at,
+                        color=discord.Color.red())
+        
+        await ctx.send(embed=embed)
 
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.has_permissions(administrator=True)
@@ -545,7 +577,7 @@ class fun(commands.Cog):
             await member.add_roles(role2)
         embed = discord.Embed(title='ShaDBot', description=(f"{member.mention} has been Promoted!"))
         await ctx.send(embed=embed)
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     @commands.has_permissions(administrator=True)
@@ -559,7 +591,7 @@ class fun(commands.Cog):
         
         embed = discord.Embed(title='ShaDBot', description=(f"{member.mention} has been demoted!"))
         await ctx.send(embed=embed)
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 2.0, type=commands.BucketType.default)
     @commands.guild_only()
@@ -571,7 +603,7 @@ class fun(commands.Cog):
                          "Shad starts frenching you", "Shad owo nuzzles your bulgy wulgy owo")
             list = random.choice(possibles)
             await ctx.send(list)
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 2.0, type=commands.BucketType.default)
     @commands.guild_only()
@@ -583,25 +615,25 @@ class fun(commands.Cog):
                          "Reilly Licks Your Butt", "Reilly Trys To Call A Doctor For Your Stupidity")
             list2 = random.choice(possibles)
             await ctx.send(list2)
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 2.0, type=commands.BucketType.default)
     async def Shad(self, ctx):
         embed = discord.Embed(title='ShaDBot', description=("shad lobes u :)"))
         embed.set_image(url='https://i.imgur.com/WV2Pv0h.png')
         await ctx.send(embed=embed)
-
+    @blacklisted()
     @commands.command()
     async def time(self, ctx):
         today = datetime.date.today()
-        bday = datetime.date(2020, 12, 19)
+        bday = datetime.date(12, 19)
         time_to_bday = bday - today
         await ctx.send(f"Time till Shad's Birthday is {time_to_bday.days} Days Away!")
 
 
 
 
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
     async def fight(self, ctx, member: discord.Member = None):
@@ -614,32 +646,49 @@ class fun(commands.Cog):
                     f"{ctx.author.mention} Murdered {member.mention} In Cold Blood"]
         donelist = random.choice(posslist)
         await ctx.send(donelist)
-
+    @blacklisted()
     @commands.command()
     @commands.cooldown(1, 5.0, type=commands.BucketType.default)
-    @commands.has_permissions(kick_members=True)
-    async def bean(self, ctx, member: discord.Member = None):
-        embed = discord.Embed(title="ShaDBoT", description=(
-            f"{member.mention} Will Be Banned In A Few Seconds!Type Cancel To Cancel This Action!"))
-        embed.set_footer(text="Made By ShaD")
+    async def thighpic(self, ctx, member: discord.Member = None):
+        link = "https://cdn.discordapp.com/attachments/763475454698455080/763479161871794226/JtEZAVJ1eKofWE2293Wo-O948zpoJXPusAmzxPPRTfr45OLkIkb15i-Agna7QHzZD3tF5NZYX06sk_HNch3MnHFOdJkCiNHa5jWc.png"
+        embed = discord.Embed(
+            title="Send Thigh Pics",
+            description=f"{member.mention} demands thigh pics from all online users",
+            colour=discord.Color.red()
+        )
+        embed.set_image(url=link)
+        embed.set_author(name="Idea By Iris")
         await ctx.send(embed=embed)
+
     
-    
+    @blacklisted()
     @commands.command()
     async def tea(self, ctx, member: discord.Member): 
+        if ctx.author.id != 550398711042277386:
+            embed = discord.Embed(
+                title="Tea's Command Only!",
+                description="You aren't Tea so you can't use this command...",
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+            )
+            await ctx.send(embed=embed)
+            return
         responselist = [f"Tea Startings Going Off On {member.mention}",
                         f"Tea Loves {member.mention} so much omg MWAHHH", 
                         f"Tea Calls {member.mention} Toxiccc", 
                         f"Tea Steals {member.mention} Memes!", 
                         f"Tea Fights {member.mention}"]
         picked = random.choice(responselist)
-        await ctx.send(picked)
+        response = discord.Embed(
+                title="Tea's Command ",
+                description=picked,
+                color=discord.Color.red(),
+                timestamp=ctx.message.created_at
+            )
+        await ctx.send(embed=response)
+    
 
-    def blacklisted():
-        async def predicate(ctx):
-            x = pull("select * from blacklist")
-            return ctx.author.id not in x
-        return commands.check(predicate)
+
         
 
     @commands.command()
@@ -656,13 +705,17 @@ class fun(commands.Cog):
         def check1(m):
             return m.channel == ctx.channel and m.author.id == ctx.author.id
         confession = await self.bot.wait_for("message", check=check1)
-        wordList = re.sub("[^\w]", " ",  confession.content).split()
-        x = [mes for mes in wordList if mes in self.banned_words]
-        if len(x) > 0:
-            await self.bot.get_channel(663143750046056507).send(f"<@{ctx.author.id}> Has Just Used A Banned Word In There Confession, The Word Was `{x[0]}`")
+        if 'discord.gg/' in confession.content.lower():
+            await self.bot.get_channel(663143750046056507).send(f"<@{ctx.author.id}> Has Just Used A Banned Word In There Confession, The Word Was `{close_match_check[0]}` and the full confession was `{confession.content}")
             blacklisted = pull("INSERT INTO blacklist VALUES (%s,%s)",(ctx.author.id,"Violated The Confession System Word Filter"))
             await ctx.author.send("You Have Been Blacklisted From The Confession System")
-
+            return
+        close_match_check = get_close_matches(confession.content,self.banned_words,n=1)
+        if len(close_match_check) > 0:
+            await self.bot.get_channel(663143750046056507).send(f"<@{ctx.author.id}> Has Just Used A Banned Word In There Confession, The Word Was `{close_match_check[0]}` and the full confession was `{confession.content}")
+            blacklisted = pull("INSERT INTO blacklist VALUES (%s,%s)",(ctx.author.id,"Violated The Confession System Word Filter"))
+            await ctx.author.send("You Have Been Blacklisted From The Confession System")
+            return
         
         confessChannel = self.bot.get_channel(570045064990949376)
         embed = discord.Embed(title=f"Finesse Confession!",description=f"*{confession.content}*",color=discord.Colour.teal())
