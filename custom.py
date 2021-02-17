@@ -9,24 +9,54 @@ import asyncio
 from discord.ext import commands
 from collections.abc import Sequence
 import time
-import logging
+
 import datetime
 import discord
+import mysql.connector
 from discord.ext import commands
 from collections.abc import Sequence
 from urllib.parse import urlparse
 import shadsmod
 # TODO make sure the url is checked when using images
 
+
+
+def pull(*args):
+    mydb = mysql.connector.connect(
+                    host="localhost",
+                    user="shad",
+                    passwd="shadii",
+                    database="finesse")
+    dbcursor = mydb.cursor(buffered=True)
+    dbcursor.execute(*args)
+    results = dbcursor.fetchall()
+    mydb.commit()
+    mydb.close()
+    return results
+
 class custom(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.error_channel = bot.get_channel(596509055376162831)
     
+    def blacklisted():
+        async def predicate(ctx):
+            
+            not_blacklisted = True
+            x = pull("select * from blacklist")
+            
+            for entry in x:
+                
+                if entry[0] == str(ctx.author.id):
+                    print("blacklisted user found")
+                    not_blacklisted = False
+            return not_blacklisted
+        return commands.check(predicate)
 
     @commands.Cog.listener()
     async def on_member_update(self,before,after):
         boost = before.guild.get_role(586494766359904257)
+
         if boost in before.roles and boost not in after.roles:
                 
             folder = f'/home/shadbot/command_data/{after.id}'
@@ -44,24 +74,24 @@ class custom(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def clearcomms(self,ctx,user):
+    async def clearcomms(self,ctx,user: discord.Member):
                      
         folder = f'/home/shadbot/command_data/{user}'
         rolelist = [x.id for x in user.roles]
-        if 586494766359904257 in rolelist or 548846050056863756 in rolelist:
-            return
-        else:
+        #if 586494766359904257 in rolelist or 548846050056863756 in rolelist:
+         #   return
+        
 
-            for filename in os.listdir(folder):
-                file_path = os.path.join(folder, filename)
-                try:
-                    if os.path.isfile(file_path) or os.path.islink(file_path):
-                        os.unlink(file_path)
-                    elif os.path.isdir(file_path):
-                        shutil.rmtree(file_path)
-                except Exception as e:
-                    print('Failed to delete %s. Reason: %s' % (file_path, e))
-            await ctx.send(f"cleared <@{user}>'s Commands!")
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        await ctx.send(f"cleared <@{user}>'s Commands!")
 
 
     @commands.command()
@@ -85,7 +115,7 @@ class custom(commands.Cog):
         await ctx.send(f"```css {' ,'.join(commands_list)}```")
             
         
-
+    @blacklisted()
     @commands.command()
     @commands.guild_only()
     @commands.has_any_role(548846050056863756,586494766359904257)
@@ -111,8 +141,8 @@ class custom(commands.Cog):
             os.makedirs(f"/home/shadbot/command_data/{ctx.author.id}")
         elif os.path.exists(f"/home/shadbot/command_data/{ctx.author.id}"):
             amount = len([name for name in os.listdir(f"/home/shadbot/command_data/{ctx.author.id}")])
-        if amount > 5 and 548846050056863756 not in rolelist:
-            await ctx.send("You Cant Create More Than 5 Commands Unless You Donate.")
+        if amount >= 2 and 548846050056863756 not in rolelist:
+            await ctx.send("You Cant Create More Than 2 Commands Unless You Donate.")
             return
         if comm_name is None:
             await ctx.send("You Need To Use The Following Syntax: \n `.create <commandname>` where `<commandname>` is the command name")
@@ -489,7 +519,14 @@ class custom(commands.Cog):
         rolelist = ctx.author.roles
         finrole = ctx.guild.get_role(586494766359904257)
         finrole2 = ctx.guild.get_role(548846050056863756)
-
+        x = pull("select * from blacklist")
+        
+        for entry in x:
+            
+            if entry[0] == str(ctx.author.id):
+                embed = discord.Embed(title="ERROR",description="You are blacklisted from this bot!",color=discord.Color.red(),timestamp=ctx.message.created_at)
+                await ctx.send(embed=embed)
+                return
         if finrole not in rolelist and finrole2 not in rolelist: return
         elif not os.path.isfile(f"/home/shadbot/command_data/{ctx.author.id}/{ctx.invoked_with}.json"):
             
